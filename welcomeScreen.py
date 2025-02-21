@@ -33,18 +33,17 @@ class WelcomeScreen(FloatLayout):
         # Centered Button
         button = MDFloatingActionButton(
             icon="arrow-right",
-            md_bg_color=(233/255,150/255,14/255, 1),  # Red button
-            pos_hint={'center_x': 0.78, 'center_y': 0.1}  # Centered
+            md_bg_color=(233/255,150/255,14/255, 1),  
+            pos_hint={'center_x': 0.78, 'center_y': 0.1}  
         )
         self.add_widget(button)
         self.add_widget(Image(
-            source="logo.png",  # Change to your image file
+            source="logo.png",  
             size_hint=(None, None),
-            size=(600, 600),  # Adjust the size of the image
-            pos_hint={'center_x': 0.5, 'center_y': 0.5}  # Adjust position
+            size=(600, 600),  
+            pos_hint={'center_x': 0.5, 'center_y': 0.5}  
         ))
 
     def update_rect(self, *args):
-        """ Update the background size when the window is resized """
         self.rect.size = self.size
         self.rect.pos = self.pos
