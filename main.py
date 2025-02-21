@@ -1,4 +1,4 @@
-import foody
+from foody import Foody
 from kivy.core.window import Window
 from kivy.app import App
 from kivy.uix.gridlayout import GridLayout
@@ -10,4 +10,4 @@ from kivymd.app import MDApp
 
 
 if __name__ == '__main__':
-    foody.foody().run()
+    Foody().run()

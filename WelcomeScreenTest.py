@@ -37,12 +37,15 @@ class WelcomeScreen(FloatLayout):
             pos_hint={'center_x': 0.78, 'center_y': 0.1}  # Centered
         )
         self.add_widget(button)
+        button.bind(on_press=self.pressed)
         self.add_widget(Image(
             source="logo.png",  # Change to your image file
             size_hint=(None, None),
             size=(600, 600),  # Adjust the size of the image
             pos_hint={'center_x': 0.5, 'center_y': 0.5}  # Adjust position
         ))
+    def pressed(self, instance):
+        print("phong")
 
     def update_rect(self, *args):
         """ Update the background size when the window is resized """
