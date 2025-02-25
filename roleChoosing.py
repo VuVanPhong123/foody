@@ -6,15 +6,7 @@ from kivy.uix.button import Button
 from kivy.uix.widget import Widget  # Import Widget for empty spaces
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.screenmanager import Screen,ScreenManager
-from kivy.config import Config
 from kivy.graphics import Color, RoundedRectangle, Rectangle
-
-# Set window size (width, height)
-Config.set('graphics', 'width', '350')
-Config.set('graphics', 'height', '600')
-
-# Disable resizing
-Config.set('graphics', 'resizable', False)
 
 from kivymd.uix.button import MDFlatButton, MDFloatingActionButton
 from kivymd.app import MDApp
@@ -47,21 +39,20 @@ class RoleChoosing(Screen):
         # Owner Button
         self.btnOption1 = RoundedButton(
             text="Chủ nhà hàng",
-            size_hint=(None, None),
-            size=(200, 80),
+            size_hint=(0.5, 0.1),  # Adjust width and height relative to the screen
             font_size=20,
-            pos=(80, 300)
+            pos_hint={"center_x": 0.5, "center_y": 0.6}  # Position relative to the screen
         )
+
         self.btnOption1.change_color(233/255, 150/255, 14/255, 1)
         self.add_widget(self.btnOption1)
 
         # Customer Button
         self.btnOption2 = RoundedButton(
             text="Khách hàng",
-            size_hint=(None, None),
-            size=(200, 80),
+            size_hint=(0.5, 0.1),  # Adjust width and height relative to the screen
             font_size=20,
-            pos=(80, 200)  
+            pos_hint={"center_x": 0.5, "center_y": 0.4} 
         )
         self.btnOption2.change_color(233/255, 150/255, 14/255, 1) 
         self.add_widget(self.btnOption2)
@@ -80,33 +71,22 @@ class RoleChoosing(Screen):
     def go_front(self,instance):
         self.manager.current='log'
     def pressed1(self, instance):
-        if self.StateOp1 == 0:
-            if self.StateOp2 == 0:
-                self.btnOption1.big(1)
-                self.btnOption2.shrink(1)
-                self.StateOp1 = 1
-                self.StateOp2 = 0
-            elif self.StateOp2 == 1:
-                self.btnOption1.big(2)
-                self.btnOption2.shrink(2)
-                self.StateOp1 = 1
-                self.StateOp2 = 0
+        self.btnOption1.change_color(210/255, 105/255, 30/255, 1)
+        self.btnOption2.restore_color()
         self.generate_button()
     def pressed2(self, instance):
-        if self.StateOp2 == 0:
-            if self.StateOp1 == 0:
-                self.btnOption2.big(1)
-                self.btnOption1.shrink(1)
-                self.StateOp2 = 1
-                self.StateOp1 = 0
-            elif self.StateOp1 == 1:
-                self.btnOption2.big(2)
-                self.btnOption1.shrink(2)
-                self.StateOp2 = 1
-                self.StateOp1 = 0
+        self.btnOption2.change_color(210/255, 105/255, 30/255, 1)
+        self.btnOption1.restore_color()
         self.generate_button()
     def update_rect(self, *args):
         self.rect.size = self.size
         self.rect.pos = self.pos
+class app(MDApp):
+    def build(self):
+        return RoleChoosing()
+if __name__ == '__main__':
+    app().run()
+
+
 
 

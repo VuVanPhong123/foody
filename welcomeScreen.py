@@ -5,14 +5,8 @@ from kivy.uix.button import Button
 from kivy.uix.widget import Widget  # Import Widget for empty spaces
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.screenmanager import Screen,ScreenManager
-from kivy.config import Config
 from kivy.graphics import Color, Rectangle
 # Set window size (width, height)
-Config.set('graphics', 'width', '350')
-Config.set('graphics', 'height', '600')
-
-# Disable resizing
-Config.set('graphics', 'resizable', False)
 from kivymd.uix.button import MDFlatButton, MDFloatingActionButton
 from kivymd.app import MDApp
 
@@ -51,3 +45,9 @@ class WelcomeScreen(Screen):
         self.rect.pos = self.pos
     def go_to_role_screen(self, instance):
             self.manager.current = 'role' 
+class app(MDApp):
+    def build(self):
+        return WelcomeScreen()
+if __name__ == '__main__':
+    app().run()
+
