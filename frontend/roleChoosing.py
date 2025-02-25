@@ -1,4 +1,4 @@
-from roundButton import RoundedButton
+from frontend.roundButton import RoundedButton
 from kivy.app import App
 from kivy.uix.label import Label
 from kivy.uix.image import Image

@@ -1,6 +1,6 @@
-from welcomeScreen import WelcomeScreen
-from roleChoosing import RoleChoosing
-from logScreen import LogScreen
+from frontend.welcomeScreen import WelcomeScreen
+from frontend.roleChoosing import RoleChoosing
+from frontend.logScreen import LogScreen
 
 from kivy.app import App
 from kivy.uix.screenmanager import Screen,ScreenManager,FallOutTransition

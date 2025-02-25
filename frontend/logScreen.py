@@ -1,4 +1,4 @@
-from roundButton import RoundedButton
+from frontend.roundButton import RoundedButton
 import pandas as pd
 from kivy.app import App
 from kivy.uix.label import Label
@@ -24,12 +24,11 @@ class LogScreen(Screen):
         self.bind(size=self.update_rect, pos=self.update_rect)
 
         self.add_widget(Image(
-            source="logo.png",  
+            source="images/logo.png",  
             size_hint=(None, None),
             size=(400, 400),  
             pos_hint={'center_x': 0.5, 'center_y': 0.82}  
         ))
-        df = pd.read_csv("accList.csv")
         # Title Label
         self.add_widget(Label(
             text="Tài khoản: ",
@@ -112,10 +111,9 @@ class LogScreen(Screen):
         else:
             self.Password.password = True  # Hide text
             self.eye_button.icon = "eye-off"  # Change icon to closed eye
-
     times=0
     def pressed1(self, instance):
-        df = pd.read_csv("accList.csv")
+        df = pd.read_csv("data/accList.csv")
         row = df[df["acc"] == self.acc.text]
         if not row.empty:
             if row.iloc[0]["pass"]==self.Password.text:
@@ -132,16 +130,15 @@ class LogScreen(Screen):
                     ))
                     self.times+=1
         else:
-                if (self.times==0):
-                    self.add_widget(Label(
-                        text="Tài khoản hoặc mật khẩu sai! ",
-                        font_size=10,
-                        size_hint=(None, None), 
-                        size=(150, 50),
-                        color=(1, 0, 0, 1),
-                        pos_hint={'center_x': 0.5, 'top': 0.3}  
-                    ))
-                    self.times+=1
+            if (self.times==0):
+                self.add_widget(Label(
+                    text="Tài khoản hoặc mật khẩu sai! ",
+                    font_size=10,
+                    size_hint=(None, None), 
+                    size=(150, 50),
+                    color=(1, 0, 0, 1),
+                    pos_hint={'center_x': 0.5, 'top': 0.3}  
+                ))
     def pressed2(self, instance):
         return
 

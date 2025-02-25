@@ -6,7 +6,7 @@ from kivy.uix.widget import Widget  # Import Widget for empty spaces
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.screenmanager import Screen,ScreenManager
 from kivy.graphics import Color, Rectangle
-# Set window size (width, height)
+
 from kivymd.uix.button import MDFlatButton, MDFloatingActionButton
 from kivymd.app import MDApp
 
@@ -34,7 +34,7 @@ class WelcomeScreen(Screen):
         self.add_widget(button)
         button.bind(on_press=self.go_to_role_screen)
         self.add_widget(Image(
-            source="logo.png",  
+            source="images/logo.png",  
             size_hint=(None, None),
             size=(600, 600),  
             pos_hint={'center_x': 0.5, 'center_y': 0.5}  
