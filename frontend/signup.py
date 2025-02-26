@@ -4,18 +4,17 @@ from kivy.app import App
 from kivy.uix.label import Label
 from kivy.uix.image import Image
 from kivy.uix.button import Button
-from kivy.uix.widget import Widget  # Import Widget for empty spaces
+from kivy.uix.widget import Widget  
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.screenmanager import Screen,ScreenManager
-
 from kivy.graphics import Color, RoundedRectangle, Rectangle
 from kivymd.uix.button import MDFlatButton, MDFloatingActionButton,MDIconButton
 from kivymd.app import MDApp
 from kivymd.uix.card import MDCard
 from kivymd.uix.textfield import MDTextField
-class LogScreen(Screen):
+class SignUp(Screen):
     def __init__(self, **kwargs):
-        super(LogScreen, self).__init__(**kwargs)
+        super(SignUp, self).__init__(**kwargs)
         
         # Background Color
         with self.canvas.before:
@@ -44,6 +43,13 @@ class LogScreen(Screen):
             size=(150, 50),
             pos_hint={'center_x': 0.2, 'top': 0.6}  
         ))
+        self.add_widget(Label(
+            text="Xác nhận: ",
+            font_size=15,
+            size_hint=(None, None), 
+            size=(150, 50),
+            pos_hint={'center_x': 0.2, 'top': 0.5}  
+        ))
         self.float = FloatLayout()
         self.acc = MDTextField(hint_text='tài khoản', multiline=False,
                               pos_hint={'x': 0.32, 'y': 0.61},size_hint_x=0.48,)
@@ -53,8 +59,12 @@ class LogScreen(Screen):
         self.float = FloatLayout()
         self.Password = MDTextField(hint_text='mật khẩu', multiline=False,
                               pos_hint={'x': 0.32, 'y': 0.51},size_hint_x=0.48,password=True)
-        print (self.Password.text)
         self.float.add_widget(self.Password)
+        self.add_widget(self.float)
+        self.float = FloatLayout()
+        self.ConfirmPassword = MDTextField(hint_text='xác nhận mật khẩu', multiline=False,
+                              pos_hint={'x': 0.32, 'y': 0.41},size_hint_x=0.48,password=True)
+        self.float.add_widget(self.ConfirmPassword)
         self.add_widget(self.float)
         self.eye_button = MDIconButton(
             icon="eye-off", 
@@ -65,6 +75,14 @@ class LogScreen(Screen):
         )
         self.add_widget(self.eye_button)
 
+        self.eye_button2 = MDIconButton(
+            icon="eye-off", 
+            md_bg_color=(233/255, 150/255, 14/255, 1),
+            pos_hint={'center_x': 0.87, 'center_y': 0.46},
+            icon_size="15sp",  
+            on_release=self.toggle_confirm_password
+        )
+        self.add_widget(self.eye_button2)
         # Arrow Button
         self.button = MDFloatingActionButton(
             icon="arrow-left",
@@ -79,29 +97,24 @@ class LogScreen(Screen):
         self.StateOp2 = 0
 
         self.btnOption1 = RoundedButton(
-            text="Đăng Nhập",
+            text="Đăng ký",
             size_hint=(0.45, 0.07),  
             font_size=25,
-            pos_hint={"center_x": 0.5, "center_y": 0.4} 
+            pos_hint={"center_x": 0.5, "center_y": 0.3} 
         )
         self.btnOption1.change_color(233/255, 150/255, 14/255, 1)
         self.add_widget(self.btnOption1)
         self.btnOption1.bind(on_press=self.pressed1)
-
-        # Customer Button
-        self.btnOption2 = RoundedButton(
-            text="Bạn chưa có tài khoản?",
-            size_hint=(0.55, 0.05),  
-            font_size=15,
-            pos_hint={"center_x": 0.5, "center_y": 0.33}  
+        Notification=''
+        self.notice=Label(
+            text=Notification,
+            font_size=10,
+            size_hint=(None, None), 
+            size=(150, 50),
+            color=(1, 0, 0, 1),
+            pos_hint={'center_x': 0.5, 'top': 0.28}  
         )
-        self.btnOption2.change_color(233/255, 150/255, 14/255, 1) 
-        self.add_widget(self.btnOption2)
-
-        # Bind Buttons
-        self.btnOption1.bind(on_press=self.pressed1)
-        self.btnOption2.bind(on_press=self.pressed2)
-        self.times=0
+        self.add_widget(self.notice)
 
     def go_back(self,instance):
         self.manager.current = 'role' 
@@ -112,49 +125,45 @@ class LogScreen(Screen):
         else:
             self.Password.password = True  # Hide text
             self.eye_button.icon = "eye-off"  # Change icon to closed eye
-    def pressed1(self, instance):
-        
-        role_choosing_screen = self.manager.get_screen('role')  # Get existing RoleChoosing instance
-        if role_choosing_screen.accType == 1:
-            df = pd.read_csv("data/accList.csv")
-        else: 
-            df = pd.read_csv("data/cusAccList.csv")
-        print(role_choosing_screen.accType)
-        row = df[df["acc"] == self.acc.text]
-        if not row.empty:
-            if row.iloc[0]["pass"]==self.Password.text:
-                print('đăng nhập thành công')
-            else: 
-                if (self.times==0):
-                    self.add_widget(Label(
-                        text="Tài khoản hoặc mật khẩu sai! ",
-                        font_size=10,
-                        size_hint=(None, None), 
-                        size=(150, 50),
-                        color=(1, 0, 0, 1),
-                        pos_hint={'center_x': 0.5, 'top': 0.3}  
-                    ))
-                    self.times+=1
+    def toggle_confirm_password(self, instance):
+        if self.ConfirmPassword.password:
+            self.ConfirmPassword.password = False  # Show text
+            self.eye_button2.icon = "eye"  # Change icon to open eye
         else:
-            if (self.times==0):
-                self.add_widget(Label(
-                    text="Tài khoản hoặc mật khẩu sai! ",
-                    font_size=10,
-                    size_hint=(None, None), 
-                    size=(150, 50),
-                    color=(1, 0, 0, 1),
-                    pos_hint={'center_x': 0.5, 'top': 0.3}  
-                ))
-            self.times+=1
-    def pressed2(self, instance):
-        self.manager.current='signUp'
-
+            self.ConfirmPassword.password = True  # Hide text
+            self.eye_button2.icon = "eye-off"  # Change icon to closed eye
+    def pressed1(self, instance):
+        sign_up_screen = self.manager.get_screen('role')
+        if sign_up_screen.accType==1:
+            df = pd.read_csv("data/accList.csv")
+        else: df = pd.read_csv("data/cusAccList.csv")
+        row = df[df["acc"] == self.acc.text]
+        if self.Password.text =='':
+            self.Notification='Vui lòng điền mật khẩu'
+        elif self.ConfirmPassword.text =='':
+            self.Notification='Vui lòng xác nhận mật khẩu'
+        elif not row.empty:
+            self.Notification='Tên tài khoản đã được sử dụng'
+        elif self.Password.text != self.ConfirmPassword.text:
+            self.Notification='Mật khẩu không trùng khớp!'
+        else:
+            self.Notification='Đăng ký thành công'
+            new_row = {"acc": self.acc.text, "pass": self.Password.text}
+            if sign_up_screen.accType == 1:
+                df = pd.read_csv("data/accList.csv")
+                df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
+                df.to_csv("data/accList.csv", index=False)
+            if sign_up_screen.accType ==2:
+                df = pd.read_csv("data/cusAccList.csv")
+                df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
+                df.to_csv("data/cusAccList.csv", index=False)
+        self.notice.text=self.Notification
     def update_rect(self, *args):
         self.rect.size = self.size
         self.rect.pos = self.pos
 class app(MDApp):
     def build(self):
-        return LogScreen()
+        return SignUp()
 if __name__ == '__main__':
     app().run()
 

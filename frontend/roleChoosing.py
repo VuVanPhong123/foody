@@ -3,7 +3,7 @@ from kivy.app import App
 from kivy.uix.label import Label
 from kivy.uix.image import Image
 from kivy.uix.button import Button
-from kivy.uix.widget import Widget  # Import Widget for empty spaces
+from kivy.uix.widget import Widget  
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.screenmanager import Screen,ScreenManager
 from kivy.graphics import Color, RoundedRectangle, Rectangle
@@ -13,6 +13,7 @@ from kivymd.app import MDApp
 from kivymd.uix.card import MDCard
 
 class RoleChoosing(Screen):
+    
     def __init__(self, **kwargs):
         super(RoleChoosing, self).__init__(**kwargs)
         
@@ -60,6 +61,7 @@ class RoleChoosing(Screen):
         # Bind Buttons
         self.btnOption1.bind(on_press=self.pressed1)
         self.btnOption2.bind(on_press=self.pressed2)
+
     def generate_button(self):
         self.button = MDFloatingActionButton(
             icon="arrow-right",
@@ -73,10 +75,14 @@ class RoleChoosing(Screen):
     def pressed1(self, instance):
         self.btnOption1.change_color(210/255, 105/255, 30/255, 1)
         self.btnOption2.restore_color()
+        self.accType = 1
+        print(self.accType)
         self.generate_button()
     def pressed2(self, instance):
         self.btnOption2.change_color(210/255, 105/255, 30/255, 1)
         self.btnOption1.restore_color()
+        self.accType = 2
+        print(self.accType)
         self.generate_button()
     def update_rect(self, *args):
         self.rect.size = self.size
