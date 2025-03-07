@@ -10,9 +10,9 @@ from kivy.graphics import Color, Rectangle
 from kivymd.uix.button import MDFlatButton, MDFloatingActionButton
 from kivymd.app import MDApp
 
-class WelcomeScreen(Screen):
+class Onlineorders(Screen):
     def __init__(self, **kwargs):
-        super(WelcomeScreen, self).__init__(**kwargs)
+        super(Onlineorders, self).__init__(**kwargs)
         with self.canvas.before:
             Color(245/255,177/255,67/255, 1)
             self.rect = Rectangle(size=self.size, pos=self.pos)
@@ -47,7 +47,7 @@ class WelcomeScreen(Screen):
             self.manager.current = 'log' 
 class app(MDApp):
     def build(self):
-        return WelcomeScreen()
+        return Onlineorders()
 if __name__ == '__main__':
     app().run()
 

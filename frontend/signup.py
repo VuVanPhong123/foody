@@ -117,7 +117,7 @@ class SignUp(Screen):
         self.add_widget(self.notice)
 
     def go_back(self,instance):
-        self.manager.current = 'role' 
+        self.manager.current = 'log' 
     def toggle_password(self, instance):
         if self.Password.password:
             self.Password.password = False  # Show text
@@ -133,10 +133,8 @@ class SignUp(Screen):
             self.ConfirmPassword.password = True  # Hide text
             self.eye_button2.icon = "eye-off"  # Change icon to closed eye
     def pressed1(self, instance):
-        sign_up_screen = self.manager.get_screen('role')
-        if sign_up_screen.accType==1:
-            df = pd.read_csv("data/accList.csv")
-        else: df = pd.read_csv("data/cusAccList.csv")
+
+        df = pd.read_csv("data/cusAccList.csv")
         row = df[df["acc"] == self.acc.text]
         if self.Password.text =='':
             self.Notification='Vui lòng điền mật khẩu'
@@ -149,14 +147,9 @@ class SignUp(Screen):
         else:
             self.Notification='Đăng ký thành công'
             new_row = {"acc": self.acc.text, "pass": self.Password.text}
-            if sign_up_screen.accType == 1:
-                df = pd.read_csv("data/accList.csv")
-                df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
-                df.to_csv("data/accList.csv", index=False)
-            if sign_up_screen.accType ==2:
-                df = pd.read_csv("data/cusAccList.csv")
-                df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
-                df.to_csv("data/cusAccList.csv", index=False)
+            df = pd.read_csv("data/cusAccList.csv")
+            df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
+            df.to_csv("data/cusAccList.csv", index=False)
         self.notice.text=self.Notification
     def update_rect(self, *args):
         self.rect.size = self.size

@@ -29,31 +29,17 @@ class LogScreen(Screen):
             size=(400, 400),  
             pos_hint={'center_x': 0.5, 'center_y': 0.82}  
         ))
-        # Title Label
-        self.add_widget(Label(
-            text="Tài khoản: ",
-            font_size=15,
-            size_hint=(None, None), 
-            size=(150, 50),
-            pos_hint={'center_x': 0.2, 'top': 0.7}  
-        ))
         self.add_widget(Label(
             text="Mật khẩu: ",
-            font_size=15,
+            font_size=20,
             size_hint=(None, None), 
             size=(150, 50),
             pos_hint={'center_x': 0.2, 'top': 0.6}  
         ))
         self.float = FloatLayout()
-        self.acc = MDTextField(hint_text='tài khoản', multiline=False,
-                              pos_hint={'x': 0.32, 'y': 0.61},size_hint_x=0.48,)
-
-        self.float.add_widget(self.acc)
-        self.add_widget(self.float)
-        self.float = FloatLayout()
         self.Password = MDTextField(hint_text='mật khẩu', multiline=False,
                               pos_hint={'x': 0.32, 'y': 0.51},size_hint_x=0.48,password=True)
-        print (self.Password.text)
+
         self.float.add_widget(self.Password)
         self.add_widget(self.float)
         self.eye_button = MDIconButton(
@@ -64,8 +50,6 @@ class LogScreen(Screen):
             on_release=self.toggle_password
         )
         self.add_widget(self.eye_button)
-
-        # Arrow Button
         self.button = MDFloatingActionButton(
             icon="arrow-left",
             md_bg_color=(233/255, 150/255, 14/255, 1),  
@@ -73,10 +57,6 @@ class LogScreen(Screen):
         )
         self.add_widget(self.button)
         self.button.bind(on_press=self.go_back)
-
-        # Initialize state variables
-        self.StateOp1 = 0
-        self.StateOp2 = 0
 
         self.btnOption1 = RoundedButton(
             text="Đăng Nhập",
@@ -87,24 +67,10 @@ class LogScreen(Screen):
         self.btnOption1.change_color(233/255, 150/255, 14/255, 1)
         self.add_widget(self.btnOption1)
         self.btnOption1.bind(on_press=self.pressed1)
-
-        # Customer Button
-        self.btnOption2 = RoundedButton(
-            text="Bạn chưa có tài khoản?",
-            size_hint=(0.55, 0.05),  
-            font_size=15,
-            pos_hint={"center_x": 0.5, "center_y": 0.33}  
-        )
-        self.btnOption2.change_color(233/255, 150/255, 14/255, 1) 
-        self.add_widget(self.btnOption2)
-
-        # Bind Buttons
-        self.btnOption1.bind(on_press=self.pressed1)
-        self.btnOption2.bind(on_press=self.pressed2)
         self.times=0
 
     def go_back(self,instance):
-        self.manager.current = 'role' 
+        self.manager.current = 'welcome' 
     def toggle_password(self, instance):
         if self.Password.password:
             self.Password.password = False  # Show text
@@ -114,40 +80,22 @@ class LogScreen(Screen):
             self.eye_button.icon = "eye-off"  # Change icon to closed eye
     def pressed1(self, instance):
         
-        role_choosing_screen = self.manager.get_screen('role')  # Get existing RoleChoosing instance
-        if role_choosing_screen.accType == 1:
-            df = pd.read_csv("data/accList.csv")
+        
+        if "1"==self.Password.text:
+            print('đăng nhập thành công')
+            self.manager.current = 'mainscreen' 
         else: 
-            df = pd.read_csv("data/cusAccList.csv")
-        print(role_choosing_screen.accType)
-        row = df[df["acc"] == self.acc.text]
-        if not row.empty:
-            if row.iloc[0]["pass"]==self.Password.text:
-                print('đăng nhập thành công')
-            else: 
-                if (self.times==0):
-                    self.add_widget(Label(
-                        text="Tài khoản hoặc mật khẩu sai! ",
-                        font_size=10,
-                        size_hint=(None, None), 
-                        size=(150, 50),
-                        color=(1, 0, 0, 1),
-                        pos_hint={'center_x': 0.5, 'top': 0.3}  
-                    ))
-                    self.times+=1
-        else:
             if (self.times==0):
                 self.add_widget(Label(
-                    text="Tài khoản hoặc mật khẩu sai! ",
-                    font_size=10,
+                    text="Mật khẩu sai! ",
+                    font_size=15,
                     size_hint=(None, None), 
                     size=(150, 50),
                     color=(1, 0, 0, 1),
-                    pos_hint={'center_x': 0.5, 'top': 0.3}  
+                    pos_hint={'center_x': 0.5, 'top': 0.35}  
                 ))
             self.times+=1
-    def pressed2(self, instance):
-        self.manager.current='signUp'
+        
 
     def update_rect(self, *args):
         self.rect.size = self.size
