@@ -22,7 +22,8 @@ class WelcomeScreen(Screen):
             font_size=24,
             size_hint=(None, None), 
             size=(150, 50),
-            pos_hint={'center_x': 0.5, 'top': 0.9}  
+            pos_hint={'center_x': 0.5, 'top': 0.9},
+            color=(0,0,0,1)
         ))
 
         # Centered Button

@@ -1,0 +1,21 @@
+item,quantity,price
+bánh cá matcha,1,8000
+bánh cá phô mai ,1,8000
+bánh cá sô cô la,1,8000
+bánh cá chà bông,1,8000
+bánh cá bò khô,1,8000
+bánh cá phô mai sô cô la,0,10000
+bánh cá phô mai chà bông,0,10000
+bánh cá trứng muối,0,10000
+trà đào(size L),0,20000
+trà đào(size M),0,15000
+trà đào(size S),0,10000
+trà chanh(size L),0,20000
+trà chanh(size M),0,15000
+trà chanh(size S),0,10000
+cacao(size L),0,20000
+cacao(size M),0,15000
+cacao(size S),0,10000
+matcha(size L),0,20000
+matcha(size M),0,15000
+matcha(size S),0,10000

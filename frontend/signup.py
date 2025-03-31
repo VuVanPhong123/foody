@@ -91,8 +91,6 @@ class SignUp(Screen):
         )
         self.add_widget(self.button)
         self.button.bind(on_press=self.go_back)
-
-        # Initialize state variables
         self.StateOp1 = 0
         self.StateOp2 = 0
 
@@ -120,18 +118,18 @@ class SignUp(Screen):
         self.manager.current = 'log' 
     def toggle_password(self, instance):
         if self.Password.password:
-            self.Password.password = False  # Show text
-            self.eye_button.icon = "eye"  # Change icon to open eye
+            self.Password.password = False  
+            self.eye_button.icon = "eye"  
         else:
-            self.Password.password = True  # Hide text
-            self.eye_button.icon = "eye-off"  # Change icon to closed eye
+            self.Password.password = True 
+            self.eye_button.icon = "eye-off"  
     def toggle_confirm_password(self, instance):
         if self.ConfirmPassword.password:
-            self.ConfirmPassword.password = False  # Show text
-            self.eye_button2.icon = "eye"  # Change icon to open eye
+            self.ConfirmPassword.password = False 
+            self.eye_button2.icon = "eye"  
         else:
-            self.ConfirmPassword.password = True  # Hide text
-            self.eye_button2.icon = "eye-off"  # Change icon to closed eye
+            self.ConfirmPassword.password = True  
+            self.eye_button2.icon = "eye-off"  
     def pressed1(self, instance):
 
         df = pd.read_csv("data/cusAccList.csv")
