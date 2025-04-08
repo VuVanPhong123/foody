@@ -4,7 +4,7 @@ from kivy.app import App
 from kivy.uix.label import Label
 from kivy.uix.image import Image
 from kivy.uix.button import Button
-from kivy.uix.widget import Widget  # Import Widget for empty spaces
+from kivy.uix.widget import Widget 
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.screenmanager import Screen, ScreenManager
 
@@ -17,8 +17,7 @@ from kivymd.uix.textfield import MDTextField
 class LogScreen(Screen):
     def __init__(self, **kwargs):
         super(LogScreen, self).__init__(**kwargs)
-        
-        # Background Color
+    
         with self.canvas.before:
             Color(245/255, 177/255, 67/255, 1)
             self.rect = Rectangle(size=self.size, pos=self.pos)

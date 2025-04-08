@@ -43,7 +43,6 @@ class OrderManager:
             return
         done_orders_str = ", ".join(done_orders_list)
 
-        # Append to revenue
         self._append_to_revenue(date_str, time_str, done_orders_str, total_price)
 
     def save_order_v2(self, done_orders_str, total_price):

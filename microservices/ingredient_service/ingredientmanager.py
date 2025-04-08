@@ -24,7 +24,6 @@ class IngredientManager:
         return ingredients
 
     def save_ingredients(self):
-        """Save the updated ingredient data to the Excel file."""
         data = []
         for ingredient, info in self.ingredients.items():
             data.append({

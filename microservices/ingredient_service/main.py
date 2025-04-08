@@ -4,7 +4,7 @@ from typing import Optional
 from ingredientmanager import IngredientManager
 import uvicorn
 app = FastAPI(title="Ingredient Service")
-manager = IngredientManager()  # This now loads data/ingredients.xlsx by default
+manager = IngredientManager() 
 
 class IngredientIn(BaseModel):
     name: str
@@ -15,7 +15,6 @@ class IngredientIn(BaseModel):
 
 @app.get("/ingredients")
 def list_ingredients():
-    # Return a list of existing ingredients
     results = []
     for ing_name, info in manager.ingredients.items():
         results.append({
@@ -29,7 +28,6 @@ def list_ingredients():
 
 @app.post("/ingredients")
 def add_ingredient(item: IngredientIn):
-    # Add a new ingredient
     manager.add_ingredient(
         name=item.name,
         quantity=item.quantity,
@@ -55,5 +53,4 @@ def delete_ingredient(name: str):
     manager.delete_ingredient(name)
     return {"message": f"Ingredient '{name}' deleted"}
 if __name__ == "__main__":
-    # Ingredient Service runs on port 8000
     uvicorn.run(app, host="0.0.0.0", port=8000)

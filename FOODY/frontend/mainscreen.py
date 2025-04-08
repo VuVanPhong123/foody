@@ -20,7 +20,6 @@ class MainScreen(Screen):
         self.bind(size=self.update_rect, pos=self.update_rect)
         self.active_tab = None
 
-        # Main layout
         root = BoxLayout(orientation='vertical')
 
         top_bar = BoxLayout(

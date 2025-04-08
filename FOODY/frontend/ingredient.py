@@ -16,20 +16,12 @@ class Ingredients(Screen):
     def __init__(self, **kwargs):
         super(Ingredients, self).__init__(**kwargs)
 
-        # Background
         with self.canvas.before:
             Color(245/255, 177/255, 67/255, 1)
             self.rect = Rectangle(size=self.size, pos=self.pos)
         self.bind(size=self.update_rect, pos=self.update_rect)
-
-        # This will store the current list of ingredients fetched from the microservice
-        # Keyed by ingredient name, containing the full record so we can do checks
         self.ingredients_data = {}
-
-        # Main layout
         self.layout = BoxLayout(orientation='vertical', padding=10, spacing=10)
-
-        # Notification label (for success/error messages)
         self.notification_label = Label(
             text="",
             font_size=16,
@@ -39,14 +31,12 @@ class Ingredients(Screen):
         )
         self.layout.add_widget(self.notification_label)
 
-        # Scroll area for listing ingredients
         self.scroll_view = ScrollView(size_hint=(1, 0.6))
         self.ingredient_list = BoxLayout(orientation='vertical', size_hint_y=None)
         self.ingredient_list.bind(minimum_height=self.ingredient_list.setter('height'))
         self.scroll_view.add_widget(self.ingredient_list)
         self.layout.add_widget(self.scroll_view)
 
-        # Input layout for adding new ingredients
         self.input_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=50)
         self.name_input = TextInput(hint_text="Tên nguyên liệu", size_hint_x=0.4)
         self.quantity_input = TextInput(hint_text="Số lượng", size_hint_x=0.2, input_filter="float")
@@ -61,7 +51,6 @@ class Ingredients(Screen):
         self.input_layout.add_widget(self.expiry_input)
         self.layout.add_widget(self.input_layout)
 
-        # Button layout for adding a new ingredient
         self.button_layout = BoxLayout(size_hint_y=None, height=50)
         self.add_button = Button(text="Thêm nguyên liệu", on_press=self.add_ingredient)
         self.button_layout.add_widget(self.add_button)
@@ -69,47 +58,36 @@ class Ingredients(Screen):
 
         self.add_widget(self.layout)
 
-        # Initially load ingredients from the microservice
         self.load_ingredients()
 
     def show_notification(self, message):
         self.notification_label.text = message
-        Clock.schedule_once(lambda dt: self.clear_notification(), 3)  # Hide after 3 seconds
+        Clock.schedule_once(lambda dt: self.clear_notification(), 3)  
 
     def clear_notification(self):
         self.notification_label.text = ""
 
     def load_ingredients(self):
-        """
-        Fetch the ingredient list from the microservice and display it.
-        """
         try:
-            url = "http://localhost:8000/ingredients"  # Adjust if your service runs elsewhere
+            url = "http://localhost:8000/ingredients"  
             resp = requests.get(url)
             if resp.status_code == 200:
-                # Microservice returns a list of dicts, e.g.:
-                # [ { "ingredient": "Tomato", "quantity": 10, "unit": "kg", ... }, ... ]
                 data = resp.json()
                 self.ingredients_data = {
                     item["ingredient"]: item for item in data
                 }
 
                 self.ingredient_list.clear_widgets()
-
-                # Build UI rows
                 for item in data:
                     ing_name = item["ingredient"]
                     quantity = item["quantity"]
                     unit = item["unit"]
                     purchase_date = item["purchase_date"]
                     expiry_date = item["expiry_date"]
-
-                    # Build the label
                     label_text = f"{ing_name} {quantity} {unit} (mua: {purchase_date} | hạn: {expiry_date})"
                     ingredient_box = BoxLayout(orientation='vertical', size_hint_y=None, height=80, padding=(10, 5))
                     label = Label(text=label_text, size_hint_y=None, height=40)
 
-                    # Buttons for "Sử dụng" (use) and "Xóa" (delete)
                     button_box = BoxLayout(size_hint_y=None, height=40, spacing=10)
                     use_input = TextInput(hint_text="Nhập số", size_hint_x=0.3, input_filter="float")
 
@@ -140,9 +118,6 @@ class Ingredients(Screen):
             print("Exception while loading ingredients:", e)
 
     def use_ingredient(self, ingredient, input_field):
-        """
-        'Use' some amount of an ingredient by sending a PUT request to the microservice.
-        """
         try:
             amount_str = input_field.text.strip()
             if not self.is_valid_amount(amount_str, ingredient):
@@ -151,13 +126,10 @@ class Ingredients(Screen):
 
             amount = float(amount_str)
 
-            # We'll call the microservice: PUT /ingredients/{name}?used_amount=X
-            # Alternatively, you might define a JSON body. Below is an example using query params:
             url = f"http://localhost:8000/ingredients/{ingredient}"
-            params = {"used_amount": amount}  # if your endpoint expects a query param, or pass as JSON
+            params = {"used_amount": amount} 
             resp = requests.put(url, params=params)
             if resp.status_code == 200:
-                # Microservice success
                 self.show_notification(f"Đã sử dụng {amount} {self.ingredients_data[ingredient]['unit']} {ingredient}")
                 self.load_ingredients()
             else:
@@ -167,17 +139,12 @@ class Ingredients(Screen):
             print("Lỗi khi sử dụng nguyên liệu:", e)
 
     def is_valid_amount(self, amount_str, ingredient):
-        """
-        Check that 'amount_str' is a valid float, >0, and <= current quantity.
-        """
         try:
             if not (amount_str.isnumeric() or self.is_valid_float(amount_str)):
                 return False
             amount = float(amount_str)
             if amount <= 0:
                 return False
-
-            # Compare to local data we loaded
             current_qty = self.ingredients_data.get(ingredient, {}).get("quantity", 0)
             if amount > current_qty:
                 return False
@@ -194,9 +161,7 @@ class Ingredients(Screen):
             return False
 
     def delete_ingredient(self, ingredient):
-        """
-        Send a DELETE request to remove an ingredient from the microservice.
-        """
+
         try:
             url = f"http://localhost:8000/ingredients/{ingredient}"
             resp = requests.delete(url)
@@ -209,9 +174,6 @@ class Ingredients(Screen):
             print("Lỗi khi xóa nguyên liệu:", e)
 
     def add_ingredient(self, instance):
-        """
-        Add a new ingredient by calling POST /ingredients.
-        """
         name = self.name_input.text.strip()
         quantity = self.quantity_input.text.strip()
         unit = self.unit_input.text.strip()

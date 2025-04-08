@@ -26,7 +26,6 @@ class WelcomeScreen(Screen):
             color=(0,0,0,1)
         ))
 
-        # Centered Button
         button = MDFloatingActionButton(
             icon="arrow-right",
             md_bg_color=(233/255,150/255,14/255, 1),  

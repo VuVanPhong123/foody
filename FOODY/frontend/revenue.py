@@ -14,20 +14,16 @@ class Revenue(Screen):
 
         self.period = 'day'
         self.active_period_btn = None
-
-        # Background
         with self.canvas.before:
             Color(245/255, 177/255, 67/255, 1)
             self.rect = Rectangle(size=self.size, pos=self.pos)
         self.bind(size=self.update_rect, pos=self.update_rect)
 
-        # This handles dynamic font sizing for the table
         self.bind(size=self.update_table_font_sizes)
 
         self.main_layout = BoxLayout(orientation='vertical', spacing=5, padding=5)
         self.add_widget(self.main_layout)
 
-        # Top bar with period buttons
         self.period_bar = BoxLayout(orientation='horizontal', size_hint_y=None, height='50dp', spacing=5)
         self.main_layout.add_widget(self.period_bar)
 
@@ -47,7 +43,6 @@ class Revenue(Screen):
         self.period_bar.add_widget(total_btn)
         self.period_buttons = [day_btn, week_btn, month_btn, total_btn]
 
-        # Scroll area for displaying details
         self.scroll_view = ScrollView(size_hint=(1, 1))
         self.main_layout.add_widget(self.scroll_view)
 
@@ -55,7 +50,6 @@ class Revenue(Screen):
         self.table_layout.bind(minimum_height=self.table_layout.setter('height'))
         self.scroll_view.add_widget(self.table_layout)
 
-        # Label to show total
         self.total_label = Label(
             text="",
             size_hint_y=None,
@@ -65,36 +59,25 @@ class Revenue(Screen):
         )
         self.main_layout.add_widget(self.total_label)
 
-        # Default to 'day'
         self.select_period(day_btn, 'day')
 
-    # -------------------------------------------------------------------------
-    # 1) Refresh data manually if needed (e.g. from another screen).
-    # -------------------------------------------------------------------------
     def refresh_data(self, period=None):
         if period:
             self.period = period
         self.display_revenue(self.period)
 
-    # -------------------------------------------------------------------------
-    # 2) Switch period (day/week/month/total) and re-fetch the relevant data
-    # -------------------------------------------------------------------------
     def select_period(self, new_btn, period):
-        # Update the button backgrounds
         if self.active_period_btn and self.active_period_btn != new_btn:
             self.active_period_btn.background_color = (233/255, 150/255, 14/255, 1)
         new_btn.background_color = (100/255, 200/255, 14/255, 1)
         self.active_period_btn = new_btn
 
-        # Display new period
         self.display_revenue(period)
 
     def display_revenue(self, period):
         
         self.period = period
         self.table_layout.clear_widgets()
-
-        # Build the microservice endpoint
         base_url = "http://localhost:8002/revenue"
         if period == 'day':
             url = f"{base_url}/daily"
@@ -139,7 +122,6 @@ class Revenue(Screen):
                     valign="middle",
                     text_size=(220, None)
                 )
-                # autosize
                 items_btn.bind(texture_size=lambda b, s: setattr(b, 'height', s[1] + 20))
 
                 time_str = str(row.get("time", ""))
@@ -171,8 +153,6 @@ class Revenue(Screen):
             self.total_label.text = f"Doanh thu hôm nay: {self.format_money(total_sum)} VND"
 
         elif period == 'week':
-            # Suppose rows is a list of dicts, each with:
-            # { "day_name_vi": "Thứ 2", "day": 28, "month": 8, "year": 2023, "price": 200000}
             for row_g in rows:
                 row_box = auto_height_boxlayout()
 
@@ -203,7 +183,6 @@ class Revenue(Screen):
             self.total_label.text = f"Doanh thu tuần này: {self.format_money(total_sum)} VND"
 
         elif period == 'month':
-            # rows might be { "day": 15, "month": 9, "year": 2023, "price": 400000 }
             for row_g in rows:
                 row_box = auto_height_boxlayout()
                 left_text = f"Ngày {row_g['day']}/{row_g['month']}/{row_g['year']}"
@@ -232,8 +211,7 @@ class Revenue(Screen):
 
             self.total_label.text = f"Doanh thu tháng này: {self.format_money(total_sum)} VND"
 
-        else:  # 'total'
-            # rows might be { "year_month": "2023-08", "price": 1000000 }
+        else:  
             for row_g in rows:
                 row_box = auto_height_boxlayout()
 
@@ -278,9 +256,6 @@ class Revenue(Screen):
         s = f"{int(value):,}"
         return s.replace(",", ".")
 
-    # -------------------------------------------------------------------------
-    # 3c) Implement fetch_revenue_data
-    # -------------------------------------------------------------------------
     def fetch_revenue_data(self, period):
         base_url = "http://localhost:8002/revenue"  # or wherever your service is
         if period == 'day':
@@ -294,7 +269,7 @@ class Revenue(Screen):
         try:
             resp = requests.get(url)
             if resp.status_code == 200:
-                return resp.json()  # a dict with e.g. { "daily_revenue":..., "details": [...] }
+                return resp.json()  
             else:
                 print("Error fetching revenue:", resp.text)
                 return {}
@@ -302,23 +277,7 @@ class Revenue(Screen):
             print("Exception calling revenue service:", e)
             return {}
 
-    # -------------------------------------------------------------------------
-    # 4) Display logic for each period's "details" data
-    # -------------------------------------------------------------------------
     def display_day_details(self, details):
-        """
-        Example structure for `details` might be:
-        [
-          {
-            "done_orders": "Pizza x1, Coke x2",
-            "time": "13:14",
-            "price": 80000,
-            "date": "2023-08-28"  # optional
-          },
-          ...
-        ]
-        We replicate your old row building logic using each order item.
-        """
         for row in details:
             done_str = str(row.get("done_orders", ""))
             items_list = done_str.split(", ")
@@ -337,7 +296,6 @@ class Revenue(Screen):
             )
             items_btn.bind(texture_size=lambda b, s: setattr(b, 'height', s[1] + 20))
 
-            # "time_btn"
             time_btn = Button(
                 text=str(row.get("time", "")),
                 size_hint=(0.15, 1),
@@ -346,8 +304,6 @@ class Revenue(Screen):
                 valign="middle"
             )
             time_btn.bind(size=lambda b, s: setattr(b, 'text_size', (s[0], None)))
-
-            # "price_btn"
             price = row.get("price", 0)
             price_str = self.format_money(price)
             price_btn = Button(
@@ -365,15 +321,6 @@ class Revenue(Screen):
             self.table_layout.add_widget(row_box)
 
     def display_week_details(self, details):
-        """
-        Suppose the microservice already aggregates by day. 
-        `details` might be something like:
-        [
-          { "day_name_vi": "Thứ 2", "day": 28, "month": 8, "year": 2023, "price": 150000 },
-          ...
-        ]
-        We'll replicate your old grouping logic or just show the data directly.
-        """
         total_sum = 0
         for row_g in details:
             row_box = self.auto_height_boxlayout()
@@ -406,13 +353,6 @@ class Revenue(Screen):
             total_sum += row_g['price']
 
     def display_month_details(self, details):
-        """
-        Possibly `details` is like:
-        [
-          { "day": 28, "month": 8, "year": 2023, "price": 200000 },
-          ...
-        ]
-        """
         for row_g in details:
             row_box = self.auto_height_boxlayout()
 
@@ -441,13 +381,6 @@ class Revenue(Screen):
             self.table_layout.add_widget(row_box)
 
     def display_total_details(self, details):
-        """
-        Possibly `details` is like:
-        [
-          { "year_month": "2023-08", "price": 1500000 },
-          ...
-        ]
-        """
         for row_g in details:
             row_box = self.auto_height_boxlayout()
 
@@ -474,9 +407,6 @@ class Revenue(Screen):
             row_box.add_widget(price_btn)
             self.table_layout.add_widget(row_box)
 
-    # -------------------------------------------------------------------------
-    # Helpers
-    # -------------------------------------------------------------------------
     def auto_height_boxlayout(self):
         rb = BoxLayout(orientation='horizontal', size_hint_y=None)
         rb.bind(minimum_height=rb.setter('height'))
@@ -484,9 +414,6 @@ class Revenue(Screen):
 
 
     def update_table_font_sizes(self, *args):
-        """
-        Recalculate font sizes for each row, the total label, and period buttons.
-        """
         multiplier = 0.02
         for row_box in self.table_layout.children:
             for btn in row_box.children:

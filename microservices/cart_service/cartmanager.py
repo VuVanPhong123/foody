@@ -14,8 +14,6 @@ class CartManager:
 
     def write_cart(self, selected_quantities, menu_items):
         prices = {item['name']: item['price'] for item in menu_items}
-
-        # Build the combined string
         order_list = [f"{name} x{qty}" for name, qty in selected_quantities.items() if qty > 0]
         total_price = sum(prices[name] * qty for name, qty in selected_quantities.items() if qty > 0)
 
