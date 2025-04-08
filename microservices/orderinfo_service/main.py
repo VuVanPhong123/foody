@@ -4,7 +4,7 @@ from typing import Optional
 from orderinfomanager import OrderInfoManager
 import uvicorn
 app = FastAPI(title="Order Info Service")
-manager = OrderInfoManager()  # loads data/orderInfo.xlsx
+manager = OrderInfoManager()  
 
 class OrderInfo(BaseModel):
     name: str
@@ -47,5 +47,4 @@ def delete_order(index: int):
     manager.delete_order(index)
     return {"message": f"Order {index} deleted"}
 if __name__ == "__main__":
-    # OrderInfo Service runs on port 8005
     uvicorn.run(app, host="0.0.0.0", port=8005)

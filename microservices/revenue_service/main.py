@@ -4,7 +4,7 @@ import uvicorn
 import pandas as pd
 
 app = FastAPI(title="Revenue Service")
-manager = RevenueManager()  # loads data/revenue.xlsx by default
+manager = RevenueManager()  
 
 @app.get("/revenue/daily")
 def get_daily_revenue():
@@ -12,7 +12,6 @@ def get_daily_revenue():
     if df.empty:
         return {"rows": [], "total_sum": 0}
 
-    # Convert price to Python int
     df['price'] = df['price'].astype(int)
 
     rows = []
@@ -34,7 +33,6 @@ def get_weekly_revenue():
     if df.empty:
         return {"rows": [], "total_sum": 0}
 
-    # Group by day_name, day, month, year
     df['date_only'] = df['date'].dt.normalize()
     df['day'] = df['date_only'].dt.day
     df['month'] = df['date_only'].dt.month
@@ -119,5 +117,4 @@ def get_total_revenue():
 
 
 if __name__ == "__main__":
-    # Start the service on port 8002 (customize if you like)
     uvicorn.run(app, host="0.0.0.0", port=8002)

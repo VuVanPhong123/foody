@@ -5,9 +5,6 @@ class RevenueManager:
         self.revenue_file = revenue_file
 
     def load_revenue_data(self):
-        """
-        Re-read the Excel each time so new rows are detected without restarting.
-        """
         try:
             df = pd.read_excel(self.revenue_file)
             if 'date' in df.columns:
@@ -18,9 +15,6 @@ class RevenueManager:
             return pd.DataFrame()
 
     def get_revenue_for_day(self):
-        """
-        Return today's rows.
-        """
         df = self.load_revenue_data().copy()
         if df.empty:
             return df
@@ -29,9 +23,6 @@ class RevenueManager:
         return df.loc[mask]
 
     def get_revenue_for_week(self):
-        """
-        Return rows from the current week.
-        """
         df = self.load_revenue_data().copy()
         if df.empty:
             return df
@@ -41,9 +32,6 @@ class RevenueManager:
         return df.loc[mask]
 
     def get_revenue_for_month(self):
-        """
-        Return rows from the current month.
-        """
         df = self.load_revenue_data().copy()
         if df.empty:
             return df
@@ -55,8 +43,5 @@ class RevenueManager:
         return df.loc[mask]
 
     def get_total_revenue(self):
-        """
-        Return all rows.
-        """
         df = self.load_revenue_data().copy()
         return df
