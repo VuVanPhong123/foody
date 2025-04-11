@@ -1,9 +1,8 @@
 from frontend.roundButton import RoundedButton
-from backend.foodmanager import FoodManager
-from backend.cartmanager import CartManager
-from backend.orderinfomanager import OrderInfoManager
+import requests  
 import os
-
+import pandas as pd 
+import ast
 from kivy.app import App
 from kivy.uix.label import Label
 from kivy.uix.boxlayout import BoxLayout
@@ -19,6 +18,17 @@ from kivymd.app import MDApp
 from kivy.uix.popup import Popup
 
 
+import requests
+from kivy.uix.screenmanager import Screen
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.button import Button
+from kivy.uix.label import Label
+from kivy.uix.scrollview import ScrollView
+from kivy.uix.popup import Popup
+from kivy.uix.image import Image
+from kivy.uix.floatlayout import FloatLayout
+from kivy.graphics import Color, Rectangle
+
 class MenuScreen(Screen):
     def __init__(self, **kwargs):
         super(MenuScreen, self).__init__(**kwargs)
@@ -28,9 +38,7 @@ class MenuScreen(Screen):
             self.rect = Rectangle(size=self.size, pos=self.pos)
         self.bind(size=self.update_rect, pos=self.update_rect)
 
-        self.food_manager = FoodManager()
-        self.cart_manager = CartManager()
-        self.menu_items = self.food_manager.menu_items
+        self.menu_items = self.fetch_menu()
         self.selected_quantities = {item['name']: 0 for item in self.menu_items}
         self.quantity_inputs = {}
 
@@ -42,7 +50,6 @@ class MenuScreen(Screen):
         self.scroll_view.add_widget(self.container)
         self.layout.add_widget(self.scroll_view)
 
-        # Add the confirm button
         self.confirm_button = RoundedButton(
             text="Thêm vào giỏ hàng",
             size_hint=(None, None),
@@ -51,12 +58,22 @@ class MenuScreen(Screen):
             font_size=18
         )
         self.confirm_button.change_color(0.9, 0.4, 0.1, 1)
-        self.confirm_button.color=(0,0,0,1)
+        self.confirm_button.color = (0, 0, 0, 1)
         self.confirm_button.bind(on_press=self.save_to_cart)
-        self.layout.add_widget(self.confirm_button)
 
+        self.layout.add_widget(self.confirm_button)
         self.add_widget(self.layout)
+
         self.populate_menu()
+
+    def fetch_menu(self):
+        try:
+            resp = requests.get("http://localhost:8003/menu")
+            if resp.status_code == 200:
+                return resp.json()
+        except Exception as e:
+            print("Error fetching menu:", e)
+        return []
 
     def populate_menu(self):
         for item in self.menu_items:
@@ -76,11 +93,13 @@ class MenuScreen(Screen):
                 info_container.bg_rect = Rectangle(size=info_container.size, pos=info_container.pos)
             info_container.bind(size=self.update_bg_rect, pos=self.update_bg_rect)
 
-            name_label = Label(text=f"{name}", size_hint=(1, 0.5), color=(0, 0, 0, 1), halign="left", valign="middle")
+            name_label = Label(text=name, size_hint=(1, 0.5), color=(0, 0, 0, 1), halign="left", valign="middle")
             price_label = Label(text=f"Giá: {price}đ", size_hint=(1, 0.5), color=(0, 0, 0, 1), halign="left", valign="middle")
+
             for lbl in [name_label, price_label]:
                 lbl.bind(size=lbl.setter('text_size'))
                 lbl.text_size = lbl.size
+
             info_container.add_widget(name_label)
             info_container.add_widget(price_label)
 
@@ -111,9 +130,6 @@ class MenuScreen(Screen):
 
             self.container.add_widget(row_box)
 
-    def update_bg_rect(self, instance, value):
-        instance.bg_rect.pos = instance.pos
-        instance.bg_rect.size = instance.size
     def make_quantity_update_handler(self, name):
         def update_quantity(instance, value):
             try:
@@ -123,6 +139,12 @@ class MenuScreen(Screen):
             self.selected_quantities[name] = quantity
         return update_quantity
 
+    def make_increment_handler(self, name, input_field):
+        return lambda btn: self.increment(name, input_field)
+
+    def make_decrement_handler(self, name, input_field):
+        return lambda btn: self.decrement(name, input_field)
+
     def increment(self, item, input_field):
         self.selected_quantities[item] += 1
         input_field.text = str(self.selected_quantities[item])
@@ -131,28 +153,32 @@ class MenuScreen(Screen):
         if self.selected_quantities[item] > 0:
             self.selected_quantities[item] -= 1
             input_field.text = str(self.selected_quantities[item])
-    def make_increment_handler(self, name, input_field):
-        return lambda btn: self.increment(name, input_field)
-
-    def make_decrement_handler(self, name, input_field):
-        return lambda btn: self.decrement(name, input_field)
 
     def save_to_cart(self, instance):
-        self.cart_manager.write_cart(self.selected_quantities, self.menu_items)
-        # Reset all quantities
-        check=False
-        for name in self.selected_quantities:
-            if self.selected_quantities[name] != 0:
-                check=True
-                break
+        check = any(qty > 0 for qty in self.selected_quantities.values())
+        if not check:
+            self.show_popup("Bạn chưa chọn gì!")
+            return
+
+        try:
+            payload = {
+                "quantities": self.selected_quantities,
+                "menu_items": self.menu_items
+            }
+            resp = requests.post("http://localhost:8004/cart", json=payload)
+            if resp.status_code == 200:
+                self.show_popup("Đã thêm vào giỏ hàng!")
+            else:
+                self.show_popup("Lỗi khi thêm vào giỏ hàng.")
+        except Exception as e:
+            print("Error saving cart:", e)
+            self.show_popup("Không thể kết nối đến máy chủ.")
+
         for name in self.selected_quantities:
             self.selected_quantities[name] = 0
             if name in self.quantity_inputs:
                 self.quantity_inputs[name].text = "0"
-        if check==True:
-            self.show_popup("Đã thêm vào giỏ hàng!")
-        else:
-            self.show_popup("Bạn chưa chọn gì!")
+
     def show_popup(self, message):
         popup = Popup(
             title="Thông báo",
@@ -163,10 +189,13 @@ class MenuScreen(Screen):
         )
         popup.open()
 
+    def update_bg_rect(self, instance, value):
+        instance.bg_rect.pos = instance.pos
+        instance.bg_rect.size = instance.size
+
     def update_rect(self, *args):
         self.rect.size = self.size
         self.rect.pos = self.pos
-
 
 class CartScreen(Screen):
     def __init__(self, **kwargs):
@@ -203,34 +232,40 @@ class CartScreen(Screen):
         self.layout.add_widget(self.buy_all_button)
         self.add_widget(self.layout)
 
-        self.load_cart()
-
     def load_cart(self):
         self.container.clear_widgets()
-        
-        cart = CartManager().read_cart()
-        if cart.empty:
-            no_order_label = Label(
+
+        try:
+            resp = requests.get("http://localhost:8004/cart")
+            cart = resp.json()
+        except Exception as e:
+            self.container.add_widget(Label(text="Lỗi khi tải giỏ hàng: " + str(e)))
+            return
+
+        if not cart:
+            self.container.add_widget(Label(
                 text="Bạn không có gì trong giỏ hàng",
                 color=(0, 0, 0, 1),
                 font_size=18,
                 size_hint=(1, None),
                 height=40
-            )
-            self.container.add_widget(no_order_label)
+            ))
             return
 
-        for _, row in cart.iterrows():
-            order_info = str(row['order']).replace(",", "\n")
-            order_info = ' ' + order_info
-            total_price = str(row['price'])
+        for row in cart:
+            item_names = row['item_names']
+            quantities = row['quantities']
 
-            order_box = BoxLayout(
-                orientation='vertical',
-                size_hint_y=None,
-                padding=5,
-                spacing=5
-            )
+            if isinstance(item_names, str):
+                item_names = ast.literal_eval(item_names)
+            if isinstance(quantities, str):
+                quantities = ast.literal_eval(quantities)
+
+            order_lines = [f"{item} x{int(qty)}" for item, qty in zip(item_names, quantities)]
+            order_info = "\n".join(order_lines)
+            total_price = str(row['total_price'])
+
+            order_box = BoxLayout(orientation='vertical', size_hint_y=None, padding=5, spacing=5)
             order_box.height = 110 + (order_info.count('\n') * 18)
 
             top_row = BoxLayout(size_hint_y=0.6, spacing=10)
@@ -243,7 +278,7 @@ class CartScreen(Screen):
                 text_size=(None, None)
             )
             order_btn.change_color(233 / 255, 150 / 255, 14 / 255, 1)
-            order_btn.color=(0, 0, 0, 1)
+            order_btn.color = (0, 0, 0, 1)
             order_btn.bind(texture_size=order_btn.setter("size"))
 
             price_btn = RoundedButton(
@@ -251,7 +286,7 @@ class CartScreen(Screen):
                 size_hint=(0.3, 1)
             )
             price_btn.change_color(233 / 255, 150 / 255, 14 / 255, 1)
-            price_btn.color=(0, 0, 0, 1)
+            price_btn.color = (0, 0, 0, 1)
 
             mua_btn = Button(
                 text="Mua",
@@ -260,7 +295,7 @@ class CartScreen(Screen):
                 background_color=(233 / 255, 150 / 255, 14 / 255, 1),
                 color=(0, 0, 0, 1),
             )
-            mua_btn.bind(on_press=lambda instance, o=row['order'], p=row['price']: self.show_order_popup(o, p, mua_tat_ca=False, single_order_row=row))
+            mua_btn.bind(on_press=lambda _, row=row: self.show_order_popup([row]))
 
             top_row.add_widget(order_btn)
             top_row.add_widget(price_btn)
@@ -269,24 +304,7 @@ class CartScreen(Screen):
 
             self.container.add_widget(order_box)
 
-    def handle_buy_all(self, instance):
-        cart = CartManager().read_cart()
-
-        if cart.empty:
-            self.show_warning("Không có đơn hàng nào trong giỏ.")
-            return
-
-        combined_order = []
-        total_price = 0
-
-        for _, row in cart.iterrows():
-            combined_order.append(str(row['order']))
-            total_price += float(row['price'])
-
-        full_order_text = ", ".join(combined_order)
-        self.show_order_popup(full_order_text, total_price, mua_tat_ca=True)
-
-    def show_order_popup(self, order, price, mua_tat_ca=False, single_order_row=None):
+    def show_order_popup(self, rows):
         content = BoxLayout(orientation='vertical', padding=10, spacing=10)
 
         name_input = TextInput(hint_text="Họ tên", size_hint_y=None, height=40)
@@ -308,57 +326,81 @@ class CartScreen(Screen):
         content.add_widget(note_input)
         content.add_widget(confirm_button)
 
-        popup = Popup(
-            title="Thông tin đơn hàng",
-            content=content,
-            size_hint=(None, None),
-            size=(400, 450),
-            auto_dismiss=True
-        )
+        popup = Popup(title="Thông tin đơn hàng", content=content, size_hint=(None, None), size=(400, 450), auto_dismiss=True)
 
-        confirm_button.bind(
-            on_press=lambda x: self.confirm_order(
-                popup,
-                name_input.text,
-                phone_input.text,
-                address_input.text,
-                note_input.text,
-                order,
-                price,
-                mua_tat_ca,
-                single_order_row
-            )
-        )
+        confirm_button.bind(on_press=lambda _: self.confirm_order(
+            popup,
+            name_input.text,
+            phone_input.text,
+            address_input.text,
+            note_input.text,
+            rows
+        ))
 
         popup.open()
-    
-    def confirm_order(self, popup, name, phone, address, note, order, price, mua_tat_ca=False, single_order_row=None):
+
+    def confirm_order(self, popup, name, phone, address, note, rows):
+        popup.dismiss()
+
         if not name.strip() or not phone.strip() or not address.strip():
             self.show_warning("Vui lòng điền đầy đủ họ tên, số điện thoại và địa chỉ.")
             return
 
-        if not phone.strip().isdigit() or len(phone.strip()) < 8:
-            self.show_warning("Số điện thoại không hợp lệ. Vui lòng nhập ít nhất 8 chữ số.")
+        try:
+            for row in rows:
+                items = row['item_names']
+                quantities = row['quantities']
+                if isinstance(items, str):
+                    items = ast.literal_eval(items)
+                if isinstance(quantities, str):
+                    quantities = ast.literal_eval(quantities)
+
+                payload = {
+                    "name": name.strip(),
+                    "phone": phone.strip(),
+                    "address": address.strip(),
+                    "note": note.strip(),
+                    "order": ", ".join([f"{item} x{qty}" for item, qty in zip(items, quantities)]),
+                    "price": row['total_price']
+                }
+
+                requests.post("http://localhost:8005/orderinfo", json=payload)
+
+                # 🧹 delete this specific cart row
+                requests.delete("http://localhost:8004/cart", json={
+                    "item_names": items,
+                    "quantities": quantities,
+                    "total_price": row['total_price']
+                })
+
+            self.show_warning("Đã gửi đơn hàng thành công.")
+            self.load_cart()
+
+        except Exception as e:
+            self.show_warning("Lỗi: " + str(e))
+
+    def handle_buy_all(self, instance):
+        try:
+            resp = requests.get("http://localhost:8004/cart")
+            cart = resp.json()
+        except Exception as e:
+            self.show_warning("Không thể tải giỏ hàng: " + str(e))
             return
 
-        popup.dismiss()
-        OrderInfoManager().save_order_info(name, phone, address, note, order, price)
+        if not cart:
+            self.show_warning("Không có đơn hàng nào để mua.")
+            return
 
-        if mua_tat_ca:
-            CartManager().clear_cart()
-        elif single_order_row is not None:
-            CartManager().delete_order(order, price)
-        self.load_cart()
-
+        self.show_order_popup(cart)
 
     def show_warning(self, message):
-        warning = Popup(
-            title="Lỗi",
+        popup = Popup(
+            title="Thông báo",
             content=Label(text=message),
             size_hint=(None, None),
             size=(350, 200)
         )
-        warning.open()
+        popup.open()
 
     def on_pre_enter(self, *args):
         self.load_cart()
@@ -366,7 +408,6 @@ class CartScreen(Screen):
     def update_rect(self, *args):
         self.rect.size = self.size
         self.rect.pos = self.pos
-
 class OrderScreen(Screen):
     def __init__(self, **kwargs):
         super(OrderScreen, self).__init__(**kwargs)
@@ -385,58 +426,61 @@ class OrderScreen(Screen):
         self.layout.add_widget(self.scroll)
         self.add_widget(self.layout)
 
-        self.order_manager = OrderInfoManager()
-        self.load_orders()
-
     def update_rect(self, *args):
         self.rect.size = self.size
         self.rect.pos = self.pos
 
     def load_orders(self):
         self.container.clear_widgets()
-        df = self.order_manager.read_orders()
+        try:
+            resp = requests.get("http://localhost:8005/orderinfo")
+            data = resp.json()
+        except Exception as e:
+            self.container.add_widget(Label(text="Lỗi khi tải đơn hàng: " + str(e)))
+            return
 
-        if df.empty:
-            no_order_label = Label(
+        if not data:
+            self.container.add_widget(Label(
                 text="Bạn không có đơn hàng nào",
                 font_size=18,
                 color=(0, 0, 0, 1),
                 size_hint=(1, None),
                 height=40
-            )
-            self.container.add_widget(no_order_label)
+            ))
             return
 
-        for idx, row in df.iterrows():
+        for idx, row in enumerate(data):
             order_text = str(row.get("order", "")).replace(",", "\n").strip()
-            order_text= ' ' + order_text
+            order_text = ' ' + order_text
             price = str(row.get("price", ""))
 
             order_box = BoxLayout(orientation='vertical', size_hint_y=None, spacing=5, padding=5)
 
             top_row = BoxLayout(size_hint_y=None, spacing=10)
 
-            order_btn = Button(
+            
+            order_btn = RoundedButton(
                 text=order_text,
                 size_hint=(0.7, None),
                 halign="left",
                 valign="middle",
-                text_size=(None , None),  
-                color=(0, 0, 0, 1)
+                text_size=(None, None)
             )
+            order_btn.change_color(233 / 255, 150 / 255, 14 / 255, 1)
+            order_btn.color = (0, 0, 0, 1)
 
-            # Force update to get correct texture size
             order_btn.texture_update()
             height = order_btn.texture_size[1] + 20
             order_btn.height = height
 
-            price_btn = Button(
+            
+            price_btn = RoundedButton(
                 text=f"{price}đ",
                 size_hint=(0.3, None),
                 height=height,
-                color=(0, 0, 0, 1)
             )
-
+            price_btn.change_color(233 / 255, 150 / 255, 14 / 255, 1)
+            price_btn.color = (0, 0, 0, 1)
             top_row.height = height
             top_row.add_widget(order_btn)
             top_row.add_widget(price_btn)
@@ -462,9 +506,8 @@ class OrderScreen(Screen):
             order_box.add_widget(top_row)
             order_box.add_widget(change_btn)
             order_box.add_widget(delete_btn)
-
-            # Let layout decide height after components are added
             order_box.height = height + 40 + 40 + 20
+
             self.container.add_widget(order_box)
 
     def show_edit_popup(self, index, row):
@@ -498,19 +541,43 @@ class OrderScreen(Screen):
         )
 
         confirm_button.bind(
-            on_press=lambda _: self.update_order(index, name_input.text, phone_input.text, address_input.text, note_input.text, popup)
+            on_press=lambda _: self.update_order(index, name_input.text, phone_input.text, address_input.text, note_input.text, row["order"], row["price"], popup)
         )
 
         popup.open()
 
-    def update_order(self, index, name, phone, address, note, popup):
-        self.order_manager.update_order(index, name, phone, address, note)
+    def update_order(self, index, name, phone, address, note, order, price, popup):
         popup.dismiss()
-        self.load_orders()
+        payload = {
+            "name": name,
+            "phone": phone,
+            "address": address,
+            "note": note,
+            "order": order,
+            "price": price
+        }
+        try:
+            requests.put(f"http://localhost:8005/orderinfo/{index}", json=payload)
+            self.load_orders()
+        except Exception as e:
+            self.show_popup("Lỗi khi cập nhật: " + str(e))
 
     def delete_order(self, index):
-        self.order_manager.delete_order(index)
-        self.load_orders()
+        try:
+            requests.delete(f"http://localhost:8005/orderinfo/{index}")
+            self.load_orders()
+        except Exception as e:
+            self.show_popup("Lỗi khi xóa đơn hàng: " + str(e))
+
+    def show_popup(self, message):
+        popup = Popup(
+            title="Thông báo",
+            content=Label(text=message),
+            size_hint=(None, None),
+            size=(350, 200)
+        )
+        popup.open()
+
     def on_pre_enter(self, *args):
         self.load_orders()
 
