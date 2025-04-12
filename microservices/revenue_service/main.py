@@ -1,10 +1,44 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 from revenuemanager import RevenueManager
-import uvicorn
 import pandas as pd
+import os
+import uvicorn
 
 app = FastAPI(title="Revenue Service")
-manager = RevenueManager()  
+manager = RevenueManager()
+
+REVENUE_FILE = "microservices/shared_data/revenue.xlsx"
+os.makedirs(os.path.dirname(REVENUE_FILE), exist_ok=True)
+
+class RevenueEntry(BaseModel):
+    done_orders: str
+    price: float
+    time: str
+    date: str  # expected format: YYYY-MM-DD
+
+@app.post("/revenue")
+def add_revenue(entry: RevenueEntry):
+    try:
+        if os.path.exists(REVENUE_FILE):
+            df = pd.read_excel(REVENUE_FILE)
+        else:
+            df = pd.DataFrame(columns=["done_orders", "price", "time", "date"])
+
+        new_row = {
+            "done_orders": entry.done_orders,
+            "price": int(entry.price),
+            "time": entry.time,
+            "date": pd.to_datetime(entry.date)
+        }
+
+        df.loc[len(df)] = new_row
+        df.to_excel(REVENUE_FILE, index=False)
+
+        return {"message": "Revenue entry added successfully."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.get("/revenue/daily")
 def get_daily_revenue():
@@ -13,7 +47,6 @@ def get_daily_revenue():
         return {"rows": [], "total_sum": 0}
 
     df['price'] = df['price'].astype(int)
-
     rows = []
     for _, row in df.iterrows():
         rows.append({
@@ -40,13 +73,8 @@ def get_weekly_revenue():
     df['day_name_en'] = df['date_only'].dt.day_name()
 
     en2vi = {
-        "Monday": "Thứ 2",
-        "Tuesday": "Thứ 3",
-        "Wednesday": "Thứ 4",
-        "Thursday": "Thứ 5",
-        "Friday": "Thứ 6",
-        "Saturday": "Thứ 7",
-        "Sunday": "Chủ Nhật"
+        "Monday": "Thứ 2", "Tuesday": "Thứ 3", "Wednesday": "Thứ 4",
+        "Thursday": "Thứ 5", "Friday": "Thứ 6", "Saturday": "Thứ 7", "Sunday": "Chủ Nhật"
     }
     df['day_name_vi'] = df['day_name_en'].map(en2vi)
 
@@ -101,7 +129,6 @@ def get_total_revenue():
         return {"rows": [], "total_sum": 0}
 
     df['year_month'] = df['date'].dt.strftime('%Y-%m')
-
     grouped = df.groupby('year_month')['price'].sum().reset_index()
     grouped["price"] = grouped["price"].astype(int)
 

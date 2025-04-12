@@ -1,5 +1,5 @@
 import requests
-from kivy.app import App
+import pandas as pd
 from kivy.uix.label import Label
 from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
@@ -8,7 +8,6 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.screenmanager import Screen
 from kivy.graphics import Color, Rectangle
 from kivymd.app import MDApp
-
 from frontend.roundButton import RoundedButton
 
 
@@ -16,12 +15,13 @@ class Makingorders(Screen):
     def __init__(self, top_manager=None, **kwargs):
         super(Makingorders, self).__init__(**kwargs)
         self.top_manager = top_manager
+
         with self.canvas.before:
-            Color(245/255, 177/255, 67/255, 1)
+            Color(245 / 255, 177 / 255, 67 / 255, 1)
             self.rect = Rectangle(size=self.size, pos=self.pos)
         self.bind(size=self.update_rect, pos=self.update_rect)
 
-        self.menu_items = self.fetch_menu()  
+        self.menu_items = self.fetch_menu()
         self.selected_items = {item: 0 for item in self.menu_items}
         self.orders = []
         self.revenue = 0
@@ -39,7 +39,7 @@ class Makingorders(Screen):
             font_size=15,
             pos_hint={"center_x": 0.1, "center_y": 0.1}
         )
-        self.create_order_btn.change_color(233/255, 150/255, 14/255, 1)
+        self.create_order_btn.change_color(233 / 255, 150 / 255, 14 / 255, 1)
         self.create_order_btn.bind(on_press=self.toggle_menu)
         self.add_widget(self.create_order_btn)
 
@@ -65,7 +65,7 @@ class Makingorders(Screen):
             text="Hoàn thành",
             size_hint=(0.4, 0.1),
             pos_hint={"center_x": 0.7, "center_y": 0.2},
-            background_color=(233/255, 150/255, 14/255, 1)
+            background_color=(233 / 255, 150 / 255, 14 / 255, 1)
         )
         self.complete_btn.bind(on_press=self.complete_order)
 
@@ -76,13 +76,13 @@ class Makingorders(Screen):
 
         self.layout.add_widget(self.scroll_view2)
         self.add_widget(self.layout)
-        
+
     def fetch_menu(self):
         try:
             url = "http://localhost:8001/menu"
             resp = requests.get(url)
             if resp.status_code == 200:
-                return resp.json()  # might be a dict or list
+                return resp.json()
             else:
                 print("Error fetching menu:", resp.text)
                 return {}
@@ -98,11 +98,11 @@ class Makingorders(Screen):
         if self.scroll_view.parent:
             self.layout.remove_widget(self.scroll_view)
             self.layout.remove_widget(self.complete_btn)
-            self.create_order_btn.change_color(233/255, 150/255, 14/255, 1)
+            self.create_order_btn.change_color(233 / 255, 150 / 255, 14 / 255, 1)
         else:
             self.layout.add_widget(self.scroll_view)
             self.layout.add_widget(self.complete_btn)
-            self.create_order_btn.change_color(200/255, 100/255, 14/255, 1)
+            self.create_order_btn.change_color(200 / 255, 100 / 255, 14 / 255, 1)
 
             if isinstance(self.menu_items, dict):
                 self.selected_items = {item: 0 for item in self.menu_items.keys()}
@@ -115,12 +115,10 @@ class Makingorders(Screen):
             self.selected_items[item_name] += 1
 
     def complete_order(self, instance):
-
         if any(qty > 0 for qty in self.selected_items.values()):
             url = "http://localhost:8001/orders"
             payload = {"items": self.selected_items}
             try:
-                
                 resp = requests.post(url, json=payload)
                 if resp.status_code == 200:
                     data = resp.json()
@@ -146,7 +144,7 @@ class Makingorders(Screen):
                 size_hint=(0.25, 1),
                 halign="center",
                 valign="middle",
-                background_color=(233/255, 150/255, 14/255, 1)
+                background_color=(233 / 255, 150 / 255, 14 / 255, 1)
             )
             done_btn.bind(size=lambda b, sz: setattr(b, 'text_size', (sz[0], None)))
 
@@ -155,7 +153,7 @@ class Makingorders(Screen):
                 size_hint=(0.25, 1),
                 halign="center",
                 valign="middle",
-                background_color=(233/255, 150/255, 14/255, 1)
+                background_color=(233 / 255, 150 / 255, 14 / 255, 1)
             )
             cancel_btn.bind(size=lambda b, sz: setattr(b, 'text_size', (sz[0], None)))
 
@@ -164,7 +162,7 @@ class Makingorders(Screen):
                 size_hint=(0.5, None),
                 halign="left",
                 valign="middle",
-                background_color=(233/255, 150/255, 14/255, 1),
+                background_color=(233 / 255, 150 / 255, 14 / 255, 1),
             )
 
             def on_texture_size(btn, tex_size):
@@ -181,7 +179,9 @@ class Makingorders(Screen):
             row_box.add_widget(done_btn)
             row_box.add_widget(cancel_btn)
             row_box.add_widget(order_btn)
+
             self.order_layout.add_widget(row_box)
+
             done_btn.bind(on_press=lambda x: self.complete_revenue(items_str, total_price, row_box))
             cancel_btn.bind(on_press=lambda x: self.remove_order(row_box))
 
@@ -190,8 +190,22 @@ class Makingorders(Screen):
         self.toggle_menu(None)
 
     def complete_revenue(self, done_orders, total_price, row_box):
+        try:
+            now = pd.Timestamp.now()
+            payload = {
+                "done_orders": done_orders.replace("\n", ", "),
+                "price": total_price,
+                "time": now.strftime("%H:%M:%S"),
+                "date": now.strftime("%Y-%m-%d")
+            }
+            resp = requests.post("http://localhost:8002/revenue", json=payload)
+            if resp.status_code != 200:
+                print("Failed to log revenue:", resp.text)
+        except Exception as e:
+            print("Error sending revenue to backend:", e)
 
         self.revenue += total_price
+
         if self.top_manager:
             try:
                 rev_screen = self.top_manager.get_screen("doanh_thu")
@@ -205,11 +219,3 @@ class Makingorders(Screen):
         self.order_layout.remove_widget(order_widget)
         if len(self.order_layout.children) == 0:
             self.no_orders_label.opacity = 1
-
-
-class DemoApp(MDApp):
-    def build(self):
-        return Makingorders()
-
-if __name__ == '__main__':
-    DemoApp().run()

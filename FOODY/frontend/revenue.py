@@ -7,11 +7,11 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.screenmanager import Screen
 from kivy.graphics import Color, Rectangle
 from kivymd.app import MDApp
-
+from kivy.clock import Clock
 class Revenue(Screen):
     def __init__(self, **kwargs):
         super(Revenue, self).__init__(**kwargs)
-
+        self.refresh_event = None
         self.period = 'day'
         self.active_period_btn = None
         with self.canvas.before:
@@ -60,11 +60,20 @@ class Revenue(Screen):
         self.main_layout.add_widget(self.total_label)
 
         self.select_period(day_btn, 'day')
+    def on_pre_enter(self, *args):
+        self.refresh_data()
+        self.refresh_event = Clock.schedule_interval(lambda dt: self.refresh_data(), 3)
+
+    def on_leave(self, *args):
+        if self.refresh_event:
+            self.refresh_event.cancel()
+            self.refresh_event = None
 
     def refresh_data(self, period=None):
         if period:
             self.period = period
         self.display_revenue(self.period)
+
 
     def select_period(self, new_btn, period):
         if self.active_period_btn and self.active_period_btn != new_btn:
@@ -421,7 +430,8 @@ class Revenue(Screen):
         self.total_label.font_size = str(int((self.width+2*self.height)/2 * 0.018)) + 'sp'
         for btn in self.period_buttons:
             btn.font_size = (self.width+2*self.height)/2 * 0.018
-
+    
+    
     def update_rect(self, *args):
         self.rect.size = self.size
         self.rect.pos = self.pos

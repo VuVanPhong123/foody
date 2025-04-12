@@ -3,6 +3,7 @@ import requests
 import os
 import pandas as pd 
 import ast
+from kivy.clock import Clock
 from kivy.app import App
 from kivy.uix.label import Label
 from kivy.uix.boxlayout import BoxLayout
@@ -356,12 +357,12 @@ class CartScreen(Screen):
                     quantities = ast.literal_eval(quantities)
 
                 payload = {
+                    "order": ", ".join([f"{item} x{qty}" for item, qty in zip(items, quantities)]),
+                    "price": row['total_price'],
                     "name": name.strip(),
-                    "phone": phone.strip(),
                     "address": address.strip(),
                     "note": note.strip(),
-                    "order": ", ".join([f"{item} x{qty}" for item, qty in zip(items, quantities)]),
-                    "price": row['total_price']
+                    "phone": phone.strip()
                 }
 
                 requests.post("http://localhost:8005/orderinfo", json=payload)
@@ -549,12 +550,13 @@ class OrderScreen(Screen):
     def update_order(self, index, name, phone, address, note, order, price, popup):
         popup.dismiss()
         payload = {
+            "order": order,
+            "price": price,
             "name": name,
-            "phone": phone,
             "address": address,
             "note": note,
-            "order": order,
-            "price": price
+            "phone": phone
+            
         }
         try:
             requests.put(f"http://localhost:8005/orderinfo/{index}", json=payload)
@@ -580,10 +582,122 @@ class OrderScreen(Screen):
 
     def on_pre_enter(self, *args):
         self.load_orders()
+        self.refresh_event = Clock.schedule_interval(lambda dt: self.load_orders(), 5)
+
+    def on_leave(self, *args):
+        if self.refresh_event:
+            self.refresh_event.cancel()
+            self.refresh_event = None
 
 class HistoryScreen(Screen):
-    pass
+    def __init__(self, **kwargs):
+        super(HistoryScreen, self).__init__(**kwargs)
 
+        with self.canvas.before:
+            Color(245 / 255, 177 / 255, 67 / 255, 1)
+            self.rect = Rectangle(size=self.size, pos=self.pos)
+        self.bind(size=self.update_rect, pos=self.update_rect)
+
+        self.layout = BoxLayout(orientation='vertical', padding=5, spacing=5)
+        self.scroll = ScrollView(size_hint=(1, 1))
+        self.container = BoxLayout(orientation='vertical', size_hint_y=None, spacing=10, padding=10)
+        self.container.bind(minimum_height=self.container.setter('height'))
+        self.scroll.add_widget(self.container)
+        self.layout.add_widget(self.scroll)
+        self.add_widget(self.layout)
+
+        self.refresh_event = None
+
+    def update_rect(self, *args):
+        self.rect.size = self.size
+        self.rect.pos = self.pos
+
+    def on_pre_enter(self, *args):
+        self.load_history()
+        self.refresh_event = Clock.schedule_interval(lambda dt: self.load_history(), 5)
+
+    def on_leave(self, *args):
+        if self.refresh_event:
+            self.refresh_event.cancel()
+            self.refresh_event = None
+
+    def load_history(self):
+        self.container.clear_widgets()
+        try:
+            response = requests.get("http://localhost:8007/history")
+            orders = response.json()
+        except Exception as e:
+            self.container.add_widget(Label(text=f"Lỗi khi tải lịch sử: {e}", color=(1, 0, 0, 1)))
+            return
+
+        if not orders:
+            self.container.add_widget(Label(text="Không có đơn hàng trong lịch sử", font_size=18))
+            return
+
+        for entry in orders:
+            food = " "+entry.get("order", "").strip()
+            price = f"{entry.get('price', 0)}đ"
+            time = entry.get("time", "--")
+            date = entry.get("date", "--")
+            status = entry.get("status", "Không rõ")
+
+            row_box = BoxLayout(orientation='vertical', size_hint_y=None, spacing=10, padding=10)
+            row_box.height = 160 + food.count("\n") * 18
+
+            top_row = BoxLayout(size_hint_y=None, height=60, spacing=10)
+
+            time_btn = RoundedButton(
+                text=f"{date} {time}",
+                size_hint=(0.25, None)
+            )
+            time_btn.change_color(233 / 255, 150 / 255, 14 / 255, 1)
+            time_btn.color = (0, 0, 0, 1)
+
+            food_btn = RoundedButton(
+                text=food,
+                size_hint=(0.5, None),
+                halign="left",
+                valign="middle",
+                text_size=(None, None)
+            )
+            food_btn.change_color(233 / 255, 150 / 255, 14 / 255, 1)
+            food_btn.color = (0, 0, 0, 1)
+
+            price_btn = RoundedButton(
+                text=price,
+                size_hint=(0.25, None)
+            )
+            price_btn.change_color(233 / 255, 150 / 255, 14 / 255, 1)
+            price_btn.color = (0, 0, 0, 1)
+
+            def sync_height(btn, sz):
+                h = sz[1] + 20
+                food_btn.height = h
+                time_btn.height = h
+                price_btn.height = h
+            food_btn.bind(texture_size=sync_height)
+
+            top_row.add_widget(time_btn)
+            top_row.add_widget(food_btn)
+            top_row.add_widget(price_btn)
+
+            status_btn = RoundedButton(
+                text=status,
+                size_hint_y=None,
+                height=40
+            )
+            if status == "Đã hoàn thành":
+                status_btn.change_color(0.2, 0.6, 0.2, 1)
+                status_btn.color = (1, 1, 1, 1)
+            elif status == "Đã hủy":
+                status_btn.change_color(0.8, 0.2, 0.2, 1)
+                status_btn.color = (1, 1, 1, 1)
+
+            row_box.add_widget(top_row)
+            row_box.add_widget(status_btn)
+            self.container.add_widget(row_box)
+
+            
 class MainScreenCus(Screen):
     def __init__(self, **kwargs):
         super(MainScreenCus, self).__init__(**kwargs)

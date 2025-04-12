@@ -7,34 +7,47 @@ import uvicorn
 
 app = FastAPI(title="Order Info Service")
 
-DATA_PATH = "microservices/orderinfo_service/data/orderInfo.xlsx"
+DATA_PATH = "microservices/shared_data/orderInfo.xlsx"
+DECLINED_FILE="microservices/shared_data/declinedOrders.xlsx"
 os.makedirs(os.path.dirname(DATA_PATH), exist_ok=True)
 
 class OrderInfo(BaseModel):
-    name: str
-    phone: str
-    address: str
-    note: Optional[str] = None
     order: str
     price: float
+    name: str
+    address: str
+    note: Optional[str] = None
+    phone: str
 
 # --- File manager functions ---
 def read_orders():
     if os.path.exists(DATA_PATH):
         return pd.read_excel(DATA_PATH)
-    return pd.DataFrame(columns=["name", "phone", "address", "note", "order", "price"])
+    return pd.DataFrame(columns=["order", "price", "name", "address", "note", "phone"])
 
 def save_order(info: OrderInfo):
     df = read_orders()
-    df.loc[len(df)] = [info.name, info.phone, info.address, info.note or "", info.order, info.price]
+    df.loc[len(df)] = [
+        info.order,
+        info.price,
+        info.name,
+        info.address,
+        info.note or "",
+        info.phone
+    ]
     df.to_excel(DATA_PATH, index=False)
 
 def update_order(index: int, updated: OrderInfo):
     df = read_orders()
     if index < 0 or index >= len(df):
         raise IndexError("Invalid index")
-    df.loc[index, ["name", "phone", "address", "note", "order", "price"]] = [
-        updated.name, updated.phone, updated.address, updated.note or "", updated.order, updated.price
+    df.loc[index, ["order", "price", "name", "address", "note", "phone"]] = [
+        updated.order,
+        updated.price,
+        updated.name,
+        updated.address,
+        updated.note or "",
+        updated.phone
     ]
     df.to_excel(DATA_PATH, index=False)
 
@@ -70,8 +83,29 @@ def modify_order(index: int, info: OrderInfo):
 @app.delete("/orderinfo/{index}")
 def remove_order(index: int):
     try:
-        delete_order(index)
-        return {"message": f"Order {index} deleted"}
+        df = read_orders()
+        if index < 0 or index >= len(df):
+            raise IndexError("Invalid index")
+
+        deleted = df.iloc[index]
+        now = pd.Timestamp.now()
+
+        declined_row = deleted.copy()
+        declined_row["time"] = now.strftime("%H:%M:%S")
+
+
+        if os.path.exists(DECLINED_FILE):
+            declined_df = pd.read_excel(DECLINED_FILE)
+        else:
+            declined_df = pd.DataFrame(columns=list(deleted.index) + ["time"])
+
+        declined_df = pd.concat([declined_df, pd.DataFrame([declined_row])], ignore_index=True)
+        declined_df.to_excel(DECLINED_FILE, index=False)
+
+        df = df.drop(index).reset_index(drop=True)
+        df.to_excel(DATA_PATH, index=False)
+
+        return {"message": f"Order {index} declined and saved to history"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
