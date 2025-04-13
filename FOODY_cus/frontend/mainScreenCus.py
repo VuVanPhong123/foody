@@ -17,7 +17,7 @@ from kivy.graphics import Color, Rectangle
 from kivymd.uix.button import MDIconButton
 from kivymd.app import MDApp
 from kivy.uix.popup import Popup
-
+from frontend.settingsScreen import SettingsScreen
 
 import requests
 from kivy.uix.screenmanager import Screen
@@ -624,80 +624,80 @@ class HistoryScreen(Screen):
     def load_history(self):
         self.container.clear_widgets()
         try:
-            response = requests.get("http://localhost:8007/history")
-            orders = response.json()
+            resp = requests.get("http://localhost:8007/history")
+            entries = resp.json()
         except Exception as e:
-            self.container.add_widget(Label(text=f"Lỗi khi tải lịch sử: {e}", color=(1, 0, 0, 1)))
+            self.container.add_widget(Label(text="Lỗi khi tải lịch sử: " + str(e)))
             return
 
-        if not orders:
-            self.container.add_widget(Label(text="Không có đơn hàng trong lịch sử", font_size=18))
+        if not entries:
+            self.container.add_widget(Label(
+                text="Không có lịch sử đơn hàng",
+                font_size=18,
+                color=(0, 0, 0, 1)
+            ))
             return
 
-        for entry in orders:
-            food = " "+entry.get("order", "").strip()
+        for entry in entries:
+            food = " " + entry.get("order", "").replace(", ", "\n").strip()
             price = f"{entry.get('price', 0)}đ"
-            time = entry.get("time", "--")
-            date = entry.get("date", "--")
-            status = entry.get("status", "Không rõ")
+            datetime_text = f"{entry.get('date', '--')}\n{entry.get('time', '--')}"
+            status = entry.get("status", "")
 
             row_box = BoxLayout(orientation='vertical', size_hint_y=None, spacing=10, padding=10)
-            row_box.height = 160 + food.count("\n") * 18
-
-            top_row = BoxLayout(size_hint_y=None, height=60, spacing=10)
+            top_row = BoxLayout(size_hint_y=None, spacing=10)
 
             time_btn = RoundedButton(
-                text=f"{date} {time}",
-                size_hint=(0.25, None)
+                text=datetime_text,
+                size_hint=(0.2, None),
+                halign="center",
+                valign="middle",
+                text_size=(None, None)
             )
             time_btn.change_color(233 / 255, 150 / 255, 14 / 255, 1)
             time_btn.color = (0, 0, 0, 1)
+            time_btn.font_size = (self.width+self.height)/2 / 50
 
-            food_btn = RoundedButton(
+            order_btn = RoundedButton(
                 text=food,
-                size_hint=(0.5, None),
+                size_hint=(0.6, None),
                 halign="left",
                 valign="middle",
                 text_size=(None, None)
             )
-            food_btn.change_color(233 / 255, 150 / 255, 14 / 255, 1)
-            food_btn.color = (0, 0, 0, 1)
+            order_btn.change_color(233 / 255, 150 / 255, 14 / 255, 1)
+            order_btn.color = (0, 0, 0, 1)
 
-            price_btn = RoundedButton(
-                text=price,
-                size_hint=(0.25, None)
-            )
+            price_btn = RoundedButton(text=price, size_hint=(0.2, None))
             price_btn.change_color(233 / 255, 150 / 255, 14 / 255, 1)
             price_btn.color = (0, 0, 0, 1)
 
-            def sync_height(btn, sz):
-                h = sz[1] + 20
-                food_btn.height = h
-                time_btn.height = h
-                price_btn.height = h
-            food_btn.bind(texture_size=sync_height)
+            order_btn.texture_update()
+            row_height = order_btn.texture_size[1] + 20
+            order_btn.height = row_height
+            time_btn.height = row_height
+            price_btn.height = row_height
+            top_row.height = row_height
 
             top_row.add_widget(time_btn)
-            top_row.add_widget(food_btn)
+            top_row.add_widget(order_btn)
             top_row.add_widget(price_btn)
 
-            status_btn = RoundedButton(
+            # Status button
+            status_btn = Button(
                 text=status,
                 size_hint_y=None,
-                height=40
+                height=40,
+                background_color=(0.1, 0.6, 0.1, 1) if status == "Đã hoàn thành" else (0.8, 0.1, 0.1, 1),
+                color=(1, 1, 1, 1)
             )
-            if status == "Đã hoàn thành":
-                status_btn.change_color(0.2, 0.6, 0.2, 1)
-                status_btn.color = (1, 1, 1, 1)
-            elif status == "Đã hủy":
-                status_btn.change_color(0.8, 0.2, 0.2, 1)
-                status_btn.color = (1, 1, 1, 1)
 
             row_box.add_widget(top_row)
             row_box.add_widget(status_btn)
+            row_box.height = top_row.height + status_btn.height + 20  # full block height
+
             self.container.add_widget(row_box)
 
-            
 class MainScreenCus(Screen):
     def __init__(self, **kwargs):
         super(MainScreenCus, self).__init__(**kwargs)
@@ -734,7 +734,7 @@ class MainScreenCus(Screen):
             md_bg_color=(233 / 255, 150 / 255, 14 / 255, 1),
             icon_size="20sp",
         )
-
+        settings_button.bind(on_press=self.go_to_settings)
         top_bar.add_widget(self.greeting_label)
         top_bar.add_widget(settings_button)
 
@@ -779,7 +779,6 @@ class MainScreenCus(Screen):
 
         if self.buttons:
             self.select_tab(self.buttons[0], "menu_screen")
-
     def select_tab(self, new_button, screen_name):
         if self.active_tab and self.active_tab != new_button:
             self.active_tab.change_color(233/255, 150/255, 14/255, 1)
@@ -796,7 +795,8 @@ class MainScreenCus(Screen):
 
     def update_font_size(self, *args):
         self.greeting_label.font_size = (self.width + self.height)/2 / 25
-
+    def go_to_settings(self, instance):
+        self.manager.current = "settings"
     def update_button_font_size(self, *args):
         for btn in self.buttons:
             btn.font_size = (self.width + self.height)/2 / 36
