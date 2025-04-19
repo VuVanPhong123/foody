@@ -14,21 +14,11 @@ from kivy.uix.button import Button
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.screenmanager import Screen, ScreenManager, FallOutTransition
 from kivy.graphics import Color, Rectangle
-from kivymd.uix.button import MDIconButton
+from kivymd.uix.button import MDIconButton,MDFloatingActionButton
 from kivymd.app import MDApp
 from kivy.uix.popup import Popup
 from frontend.settingsScreen import SettingsScreen
-
-import requests
-from kivy.uix.screenmanager import Screen
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.button import Button
-from kivy.uix.label import Label
-from kivy.uix.scrollview import ScrollView
-from kivy.uix.popup import Popup
-from kivy.uix.image import Image
-from kivy.uix.floatlayout import FloatLayout
-from kivy.graphics import Color, Rectangle
+from frontend.geminiChatScreen import GeminiChatScreen  
 
 class MenuScreen(Screen):
     def __init__(self, **kwargs):
@@ -61,6 +51,14 @@ class MenuScreen(Screen):
         self.confirm_button.change_color(0.9, 0.4, 0.1, 1)
         self.confirm_button.color = (0, 0, 0, 1)
         self.confirm_button.bind(on_press=self.save_to_cart)
+
+        self.gemini_btn = MDFloatingActionButton(
+            icon="robot",
+            md_bg_color=(233 / 255, 150 / 255, 14 / 255, 1),
+            pos_hint={"x": 0.02, "y": 0.02}
+        )
+        self.gemini_btn.bind(on_press=self.open_gemini_chat)
+        self.layout.add_widget(self.gemini_btn)
 
         self.layout.add_widget(self.confirm_button)
         self.add_widget(self.layout)
@@ -194,6 +192,8 @@ class MenuScreen(Screen):
     def update_bg_rect(self, instance, value):
         instance.bg_rect.pos = instance.pos
         instance.bg_rect.size = instance.size
+    def open_gemini_chat(self, instance):
+        self.manager.current = "gemini"
 
     def update_rect(self, *args):
         self.rect.size = self.size
@@ -772,6 +772,7 @@ class MainScreenCus(Screen):
         self.screen_manager.add_widget(CartScreen(name="cart_screen"))
         self.screen_manager.add_widget(OrderScreen(name="order_screen"))
         self.screen_manager.add_widget(HistoryScreen(name="history_screen"))
+        self.screen_manager.add_widget(GeminiChatScreen(name="gemini"))
 
         root.add_widget(top_bar)
         root.add_widget(tab_bar)

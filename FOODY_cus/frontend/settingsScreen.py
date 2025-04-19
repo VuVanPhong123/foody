@@ -35,6 +35,8 @@ class SettingsScreen(Screen):
                 btn.bind(on_press=self.go_to_review)
             if label == "Liên hệ":
                 btn.bind(on_press=self.go_to_chat)
+            if label == "Đổi mật khẩu":
+                btn.bind(on_press=self.go_to_pass)
             btn.change_color(233 / 255, 150 / 255, 14 / 255, 1)
             btn.color=(0,0,0,1)
             layout.add_widget(btn)
@@ -61,4 +63,6 @@ class SettingsScreen(Screen):
         self.manager.current = "review"
     def go_to_chat(self, instance):
         self.manager.current = "chat"
+    def go_to_pass(self, instance):
+        self.manager.current = "changepass"
     

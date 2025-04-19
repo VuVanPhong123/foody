@@ -13,7 +13,9 @@ services = [
     ("history_service", 8007),
     ("review_service", 8008),
     ("chat_service", 8009),
-    ("auth_service", 8010)
+    ("auth_service", 8010),
+    ("auth_service_cus", 8011),
+    ("menu_chat_service", 8012)
 ]
 
 processes = []

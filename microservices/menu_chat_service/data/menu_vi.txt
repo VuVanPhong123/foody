@@ -1,0 +1,127 @@
+﻿bánh cá matcha (8000 VND)
+Category: dessert
+Description: Bánh hình con cá, nhân kem matcha ngọt ngào, thích hợp cho món tráng miệng.
+Calories: 180 kcal
+Available: Yes
+
+bánh cá phô mai  (8000 VND)
+Category: savory
+Description: Bánh cá nóng hổi với nhân phô mai tan chảy, thơm ngon đậm đà.
+Calories: 210 kcal
+Available: Yes
+
+bánh cá sô cô la (8000 VND)
+Category: dessert
+Description: Bánh cá ngọt nhân sô cô la, hấp dẫn với trẻ em.
+Calories: 200 kcal
+Available: Yes
+
+bánh cá chà bông (8000 VND)
+Category: savory
+Description: Bánh cá nhân chà bông mặn ngọt, hương vị đậm đà.
+Calories: 190 kcal
+Available: Yes
+
+bánh cá bò khô (8000 VND)
+Category: snack
+Description: Bánh cá giòn rụm với nhân bò khô cay nồng, rất hợp để ăn vặt.
+Calories: 220 kcal
+Available: Yes
+
+bánh cá phô mai sô cô la (8000 VND)
+Category: dessert
+Description: Bánh hình con cá, nhân kem matcha ngọt ngào, thích hợp cho món tráng miệng.
+Calories: 180 kcal
+Available: Yes
+
+bánh cá phô mai chà bông (10000 VND)
+Category: savory
+Description: Bánh cá nóng hổi với nhân phô mai tan chảy, thơm ngon đậm đà.
+Calories: 210 kcal
+Available: Yes
+
+bánh cá phô mai sô cô la(trắng) (10000 VND)
+Category: dessert
+Description: Bánh cá ngọt nhân sô cô la, hấp dẫn với trẻ em.
+Calories: 200 kcal
+Available: Yes
+
+bánh cá trứng muối (10000 VND)
+Category: savory
+Description: Bánh cá nhân chà bông mặn ngọt, hương vị đậm đà.
+Calories: 190 kcal
+Available: Yes
+
+trà đào(size L) (20000 VND)
+Category: nước uống
+Description: Trà Đào size size L, thức uống mát lạnh, giải khát tuyệt vời cho ngày nóng.
+Calories: 200 kcal
+Available: Yes
+
+trà đào(size M) (15000 VND)
+Category: nước uống
+Description: Trà Đào size size M, thức uống mát lạnh, giải khát tuyệt vời cho ngày nóng.
+Calories: 160 kcal
+Available: Yes
+
+trà đào(size S) (10000 VND)
+Category: nước uống
+Description: Trà Đào size size S, thức uống mát lạnh, giải khát tuyệt vời cho ngày nóng.
+Calories: 120 kcal
+Available: Yes
+
+trà chanh(size L) (20000 VND)
+Category: nước uống
+Description: Trà Chanh size size L, thức uống mát lạnh, giải khát tuyệt vời cho ngày nóng.
+Calories: 200 kcal
+Available: Yes
+
+trà chanh(size M) (15000 VND)
+Category: nước uống
+Description: Trà Chanh size size M, thức uống mát lạnh, giải khát tuyệt vời cho ngày nóng.
+Calories: 160 kcal
+Available: Yes
+
+trà chanh(size S) (10000 VND)
+Category: nước uống
+Description: Trà Chanh size size S, thức uống mát lạnh, giải khát tuyệt vời cho ngày nóng.
+Calories: 120 kcal
+Available: Yes
+
+cacao(size L) (20000 VND)
+Category: nước uống
+Description: Cacao size size L, thức uống mát lạnh, giải khát tuyệt vời cho ngày nóng.
+Calories: 200 kcal
+Available: Yes
+
+cacao(size M) (15000 VND)
+Category: nước uống
+Description: Cacao size size M, thức uống mát lạnh, giải khát tuyệt vời cho ngày nóng.
+Calories: 160 kcal
+Available: Yes
+
+cacao(size S) (10000 VND)
+Category: nước uống
+Description: Cacao size size S, thức uống mát lạnh, giải khát tuyệt vời cho ngày nóng.
+Calories: 120 kcal
+Available: Yes
+
+matcha(size L) (20000 VND)
+Category: nước uống
+Description: Matcha size size L, thức uống mát lạnh, giải khát tuyệt vời cho ngày nóng.
+Calories: 200 kcal
+Available: Yes
+
+matcha(size M) (15000 VND)
+Category: nước uống
+Description: Matcha size size M, thức uống mát lạnh, giải khát tuyệt vời cho ngày nóng.
+Calories: 160 kcal
+Available: Yes
+
+matcha(size S) (10000 VND)
+Category: nước uống
+Description: Matcha size size S, thức uống mát lạnh, giải khát tuyệt vời cho ngày nóng.
+Calories: 120 kcal
+Available: Yes
+
+all the description is right. Do not ask any question about it.
