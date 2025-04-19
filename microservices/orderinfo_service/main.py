@@ -86,18 +86,15 @@ def remove_order(index: int):
         df = read_orders()
         if index < 0 or index >= len(df):
             raise IndexError("Invalid index")
-
         deleted = df.iloc[index]
         now = pd.Timestamp.now()
-
         declined_row = deleted.copy()
         declined_row["time"] = now.strftime("%H:%M:%S")
-
-
+        declined_row["date"] = now.strftime("%Y-%m-%d")  
         if os.path.exists(DECLINED_FILE):
             declined_df = pd.read_excel(DECLINED_FILE)
         else:
-            declined_df = pd.DataFrame(columns=list(deleted.index) + ["time"])
+            declined_df = pd.DataFrame(columns=list(deleted.index) + ["time", "date"])
 
         declined_df = pd.concat([declined_df, pd.DataFrame([declined_row])], ignore_index=True)
         declined_df.to_excel(DECLINED_FILE, index=False)
@@ -108,6 +105,7 @@ def remove_order(index: int):
         return {"message": f"Order {index} declined and saved to history"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8005)

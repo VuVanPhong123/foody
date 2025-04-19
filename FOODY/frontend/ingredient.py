@@ -1,5 +1,6 @@
 import pandas as pd
 import requests
+from frontend.roundButton import RoundedButton
 from kivy.app import App
 from kivy.uix.label import Label
 from kivy.uix.textinput import TextInput
@@ -52,7 +53,9 @@ class Ingredients(Screen):
         self.layout.add_widget(self.input_layout)
 
         self.button_layout = BoxLayout(size_hint_y=None, height=50)
-        self.add_button = Button(text="Thêm nguyên liệu", on_press=self.add_ingredient)
+        self.add_button = RoundedButton(text="Thêm nguyên liệu", on_press=self.add_ingredient)
+        self.add_button.change_color(233/255, 150/255, 14/255, 1)
+        self.add_button.color=(0,0,0,1)
         self.button_layout.add_widget(self.add_button)
         self.layout.add_widget(self.button_layout)
 
@@ -80,28 +83,31 @@ class Ingredients(Screen):
                 self.ingredient_list.clear_widgets()
                 for item in data:
                     ing_name = item["ingredient"]
-                    quantity = item["quantity"]
+                    quantity = round(item["quantity"],2)
                     unit = item["unit"]
                     purchase_date = item["purchase_date"]
                     expiry_date = item["expiry_date"]
                     label_text = f"{ing_name} {quantity} {unit} (mua: {purchase_date} | hạn: {expiry_date})"
                     ingredient_box = BoxLayout(orientation='vertical', size_hint_y=None, height=80, padding=(10, 5))
-                    label = Label(text=label_text, size_hint_y=None, height=40)
+                    label = Label(text=label_text, size_hint_y=None, height=40,color=(0,0,0,1))
 
                     button_box = BoxLayout(size_hint_y=None, height=40, spacing=10)
                     use_input = TextInput(hint_text="Nhập số", size_hint_x=0.3, input_filter="float")
 
-                    use_button = Button(
+                    use_button = RoundedButton(
                         text="Sử dụng",
                         size_hint_x=0.35,
                         on_press=lambda btn, ing=ing_name, inp=use_input: self.use_ingredient(ing, inp)
                     )
-                    delete_button = Button(
+                    use_button.change_color(233/255, 150/255, 14/255, 1)
+                    use_button.color=(0,0,0,1)
+                    delete_button = RoundedButton(
                         text="Xóa",
                         size_hint_x=0.35,
                         on_press=lambda btn, ing=ing_name: self.delete_ingredient(ing)
                     )
-
+                    delete_button.change_color(233/255, 150/255, 14/255, 1)
+                    delete_button.color=(0,0,0,1)
                     button_box.add_widget(use_input)
                     button_box.add_widget(use_button)
                     button_box.add_widget(delete_button)

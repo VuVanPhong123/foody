@@ -176,9 +176,10 @@ class MenuScreen(Screen):
             self.show_popup("Không thể kết nối đến máy chủ.")
 
         for name in self.selected_quantities:
-            self.selected_quantities[name] = 0
             if name in self.quantity_inputs:
                 self.quantity_inputs[name].text = "0"
+                self.quantity_inputs[name].bind(text=self.make_quantity_update_handler(name))
+            self.selected_quantities[name] = 0
 
     def show_popup(self, message):
         popup = Popup(

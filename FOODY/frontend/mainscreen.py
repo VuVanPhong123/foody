@@ -3,6 +3,8 @@ from frontend.roundButton import RoundedButton
 from frontend.orders import Orders
 from frontend.ingredient import Ingredients
 from frontend.revenue import Revenue
+from frontend.reviewViewerScreen import ReviewViewerScreen
+from frontend.settingsScreenOwner import SettingsScreenOwner
 from kivy.app import App
 from kivy.uix.label import Label
 from kivy.uix.boxlayout import BoxLayout
@@ -57,7 +59,7 @@ class MainScreen(Screen):
             md_bg_color=(233/255, 150/255, 14/255, 1),
             icon_size="20sp",
         )
-
+        settings_button.bind(on_press=self.go_to_settings)
         top_bar.add_widget(self.greeting_label)
         top_bar.add_widget(self.date_label)
         top_bar.add_widget(settings_button)
@@ -95,7 +97,8 @@ class MainScreen(Screen):
         self.screen_manager.add_widget(Orders(name="don_hang", top_manager=self.screen_manager))
         self.screen_manager.add_widget(Revenue(name="doanh_thu"))
         self.screen_manager.add_widget(Ingredients(name="nguyen_lieu"))
-        self.screen_manager.add_widget(Orders(name="phan_hoi"))
+        self.screen_manager.add_widget(ReviewViewerScreen(name="phan_hoi"))
+
 
         root.add_widget(top_bar)
         root.add_widget(tab_bar)
@@ -126,7 +129,8 @@ class MainScreen(Screen):
     def update_rect(self, *args):
         self.rect.size = self.size
         self.rect.pos = self.pos
-
+    def go_to_settings(self, instance):
+        self.manager.current = "settings_owner"
     def update_font_size(self, *args):
         self.greeting_label.font_size = (self.width+self.height)/2 / 25
         self.date_label.font_size = (self.width+self.height)/2 / 35
