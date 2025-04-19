@@ -44,12 +44,10 @@ def delete_order(index: int):
         deleted = df.iloc[index]
         now = pd.Timestamp.now()
 
-        # ✅ Add both time and date to declined row
         declined_row = deleted.copy()
         declined_row["time"] = now.strftime("%H:%M:%S")
         declined_row["date"] = now.strftime("%Y-%m-%d")
 
-        # ✅ Ensure the new columns exist in the DataFrame
         if os.path.exists(DECLINED_FILE):
             declined_df = pd.read_excel(DECLINED_FILE)
         else:
@@ -58,7 +56,6 @@ def delete_order(index: int):
         declined_df = pd.concat([declined_df, pd.DataFrame([declined_row])], ignore_index=True)
         declined_df.to_excel(DECLINED_FILE, index=False)
 
-        # ✅ Remove the declined order from the original list
         df = df.drop(index).reset_index(drop=True)
         df.to_excel(ORDER_FILE, index=False)
 
@@ -83,7 +80,6 @@ def mark_order_completed(index: int):
             "date": now.strftime("%Y-%m-%d")
         }
 
-        # --- Save to revenue.xlsx ---
         if os.path.exists(REVENUE_FILE):
             revenue_df = pd.read_excel(REVENUE_FILE)
         else:
@@ -91,7 +87,6 @@ def mark_order_completed(index: int):
         revenue_df.loc[len(revenue_df)] = new_row
         revenue_df.to_excel(REVENUE_FILE, index=False)
 
-        # --- Save to doneOrders.xlsx ---
         if os.path.exists(DONE_FILE):
             done_df = pd.read_excel(DONE_FILE)
         else:
@@ -99,7 +94,6 @@ def mark_order_completed(index: int):
         done_df.loc[len(done_df)] = new_row
         done_df.to_excel(DONE_FILE, index=False)
 
-        # --- Remove from current online orders ---
         df = df.drop(index).reset_index(drop=True)
         df.to_excel(ORDER_FILE, index=False)
 

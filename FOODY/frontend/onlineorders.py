@@ -62,7 +62,6 @@ class Onlineorders(Screen):
             row_box.bind(minimum_height=row_box.setter("height"))
 
 
-            # Top row: order + price
             top_row = BoxLayout(size_hint_y=None, spacing=10)
             top_row.bind(minimum_height=top_row.setter("height"))
             order_btn = RoundedButton(
@@ -92,7 +91,6 @@ class Onlineorders(Screen):
             top_row.add_widget(order_btn)
             top_row.add_widget(price_btn)
 
-            # Action row
             action_row = BoxLayout(size_hint_y=None, height=40, spacing=10)
 
             done_btn = Button(

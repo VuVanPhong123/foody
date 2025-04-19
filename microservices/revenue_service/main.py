@@ -15,7 +15,7 @@ class RevenueEntry(BaseModel):
     done_orders: str
     price: float
     time: str
-    date: str  # expected format: YYYY-MM-DD
+    date: str  
 
 @app.post("/revenue")
 def add_revenue(entry: RevenueEntry):

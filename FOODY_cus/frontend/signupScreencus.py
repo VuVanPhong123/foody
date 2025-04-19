@@ -27,7 +27,6 @@ class SignUpScreen(Screen):
             pos_hint={"center_x": 0.5, "center_y": 0.82}
         ))
 
-        # Username field
         self.username = MDTextField(
             hint_text="Tên tài khoản",
             pos_hint={"center_x": 0.5, "center_y": 0.6},
@@ -35,7 +34,6 @@ class SignUpScreen(Screen):
         )
         self.layout.add_widget(self.username)
 
-        # Password field
         self.password = MDTextField(
             hint_text="Mật khẩu",
             password=True,
@@ -44,7 +42,6 @@ class SignUpScreen(Screen):
         )
         self.layout.add_widget(self.password)
 
-        # Confirm password field
         self.confirm = MDTextField(
             hint_text="Xác nhận mật khẩu",
             password=True,
@@ -53,7 +50,6 @@ class SignUpScreen(Screen):
         )
         self.layout.add_widget(self.confirm)
 
-        # Eye icons
         self.eye1 = MDIconButton(
             icon="eye-off",
             pos_hint={"center_x": 0.85, "center_y": 0.5},
@@ -69,7 +65,6 @@ class SignUpScreen(Screen):
         self.layout.add_widget(self.eye1)
         self.layout.add_widget(self.eye2)
 
-        # Notification label
         self.error_label = Label(
             text="",
             font_size=14,
@@ -78,7 +73,6 @@ class SignUpScreen(Screen):
         )
         self.layout.add_widget(self.error_label)
 
-        # Register button
         self.register_btn = RoundedButton(
             text="Đăng ký",
             size_hint=(0.5, 0.07),
@@ -89,7 +83,6 @@ class SignUpScreen(Screen):
         self.register_btn.bind(on_press=self.register)
         self.layout.add_widget(self.register_btn)
 
-        # Back button
         self.back_btn = MDFloatingActionButton(
             icon="arrow-left",
             pos_hint={"x": 0.05, "y": 0.05},

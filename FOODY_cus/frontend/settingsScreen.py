@@ -1,5 +1,3 @@
-# frontend/settingsScreen.py
-
 from kivy.uix.screenmanager import Screen
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.button import Button

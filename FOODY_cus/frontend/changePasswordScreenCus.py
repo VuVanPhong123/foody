@@ -20,8 +20,7 @@ class ChangePasswordScreen(Screen):
         self.layout = FloatLayout()
         self.add_widget(self.layout)
 
-        # Username (optional display only)
-        self.username = ""  # <- should be set after login
+        self.username = ""  
         self.user_label = Label(
             text="",
             font_size=18,
@@ -30,7 +29,6 @@ class ChangePasswordScreen(Screen):
         )
         self.layout.add_widget(self.user_label)
 
-        # Old password
         self.old_pass = MDTextField(
             hint_text="Mật khẩu cũ",
             password=True,
@@ -39,7 +37,6 @@ class ChangePasswordScreen(Screen):
         )
         self.layout.add_widget(self.old_pass)
 
-        # New password
         self.new_pass = MDTextField(
             hint_text="Mật khẩu mới",
             password=True,
@@ -48,7 +45,6 @@ class ChangePasswordScreen(Screen):
         )
         self.layout.add_widget(self.new_pass)
 
-        # Confirm password
         self.confirm_pass = MDTextField(
             hint_text="Xác nhận mật khẩu",
             password=True,
@@ -57,7 +53,6 @@ class ChangePasswordScreen(Screen):
         )
         self.layout.add_widget(self.confirm_pass)
 
-        # Eye icons
         self.eye1 = MDIconButton(
             icon="eye-off", pos_hint={"center_x": 0.85, "center_y": 0.65},
             on_release=self.toggle_old)
@@ -71,7 +66,6 @@ class ChangePasswordScreen(Screen):
         self.layout.add_widget(self.eye2)
         self.layout.add_widget(self.eye3)
 
-        # Error/Success label
         self.status = Label(
             text="",
             font_size=14,
@@ -80,7 +74,6 @@ class ChangePasswordScreen(Screen):
         )
         self.layout.add_widget(self.status)
 
-        # Change button
         self.confirm_btn = RoundedButton(
             text="Đổi mật khẩu",
             size_hint=(0.5, 0.07),
@@ -90,7 +83,6 @@ class ChangePasswordScreen(Screen):
         self.confirm_btn.bind(on_press=self.change_password)
         self.layout.add_widget(self.confirm_btn)
 
-        # Back button
         self.back_btn = MDFloatingActionButton(
             icon="arrow-left",
             pos_hint={"x": 0.05, "y": 0.05},

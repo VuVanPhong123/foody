@@ -368,7 +368,6 @@ class CartScreen(Screen):
 
                 requests.post("http://localhost:8005/orderinfo", json=payload)
 
-                # 🧹 delete this specific cart row
                 requests.delete("http://localhost:8004/cart", json={
                     "item_names": items,
                     "quantities": quantities,
@@ -684,7 +683,6 @@ class HistoryScreen(Screen):
             top_row.add_widget(order_btn)
             top_row.add_widget(price_btn)
 
-            # Status button
             status_btn = Button(
                 text=status,
                 size_hint_y=None,

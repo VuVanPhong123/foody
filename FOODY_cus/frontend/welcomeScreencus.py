@@ -2,7 +2,7 @@ from kivy.app import App
 from kivy.uix.label import Label
 from kivy.uix.image import Image
 from kivy.uix.button import Button
-from kivy.uix.widget import Widget  # Import Widget for empty spaces
+from kivy.uix.widget import Widget 
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.screenmanager import Screen,ScreenManager
 from kivy.graphics import Color, Rectangle
@@ -26,7 +26,6 @@ class WelcomeScreen(Screen):
             color=(0, 0, 0, 1)
         ))
 
-        # Centered Button
         button = MDFloatingActionButton(
             icon="arrow-right",
             md_bg_color=(233/255,150/255,14/255, 1),  

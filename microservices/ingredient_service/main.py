@@ -43,7 +43,7 @@ def use_ingredient(name: str, used_amount: float):
         raise HTTPException(status_code=404, detail="Ingredient not found")
     if used_amount <= 0:
         raise HTTPException(status_code=400, detail="Used amount must be positive")
-    manager.update_ingredient(name, used_amount)  # subtract used_amount
+    manager.update_ingredient(name, used_amount)  
     return {"message": f"Used {used_amount} of '{name}'"}
 
 @app.delete("/ingredients/{name}")

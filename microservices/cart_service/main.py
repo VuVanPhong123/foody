@@ -9,8 +9,8 @@ app = FastAPI(title="Cart Service")
 CART_FILE = "microservices/cart_service/data/cart.xlsx"
 
 class CartRequest(BaseModel):
-    quantities: dict  # {"Pizza": 2}
-    menu_items: list  # [{"name": ..., "price": ...}]
+    quantities: dict  
+    menu_items: list  
 
 def read_cart_from_excel():
     if not os.path.exists(CART_FILE):
@@ -88,12 +88,10 @@ async def delete_cart(request: Request):
         return {"message": "Nothing to delete"}
 
     if not body:
-        # Full clear
         df = pd.DataFrame(columns=["item_names", "quantities", "total_price"])
         write_cart_to_excel(df)
         return {"message": "Cart cleared"}
 
-    # Delete specific matching row
     try:
         target_names = body.get("item_names", [])
         target_quantities = body.get("quantities", [])

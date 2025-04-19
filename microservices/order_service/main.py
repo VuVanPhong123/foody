@@ -9,7 +9,7 @@ app = FastAPI(title="Order Service")
 FOOD_FILE = "microservices/food_service/data/food.xlsx"
 
 class OrderRequest(BaseModel):
-    items: dict  # e.g., {"Pizza": 2, "Burger": 1}
+    items: dict 
 
 def load_menu():
     if not os.path.exists(FOOD_FILE):

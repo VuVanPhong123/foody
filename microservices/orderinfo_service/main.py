@@ -19,7 +19,6 @@ class OrderInfo(BaseModel):
     note: Optional[str] = None
     phone: str
 
-# --- File manager functions ---
 def read_orders():
     if os.path.exists(DATA_PATH):
         return pd.read_excel(DATA_PATH)

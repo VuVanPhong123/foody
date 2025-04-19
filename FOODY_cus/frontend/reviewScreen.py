@@ -22,7 +22,6 @@ class ReviewScreen(Screen):
         self.stars = []
         self.rating = 0
 
-        # Create 5 star buttons
         for i in range(5):
             star_btn = MDFloatingActionButton(
                 icon="star-outline",
@@ -35,7 +34,6 @@ class ReviewScreen(Screen):
             self.layout.add_widget(star_btn)
             self.stars.append(star_btn)
 
-        # Comment box
         self.comment_box = TextInput(
             hint_text="Viết đánh giá của bạn...",
             size_hint=(0.8, 0.3),
@@ -44,7 +42,6 @@ class ReviewScreen(Screen):
         )
         self.layout.add_widget(self.comment_box)
 
-        # Clear rating button
         clear_btn = Button(
             text="Xóa đánh giá",
             size_hint=(0.4, 0.1),
@@ -54,8 +51,6 @@ class ReviewScreen(Screen):
         )
         clear_btn.bind(on_press=self.clear_review)
         self.layout.add_widget(clear_btn)
-
-        # Submit review button
         confirm_btn = Button(
             text="Xác nhận",
             size_hint=(0.4, 0.1),

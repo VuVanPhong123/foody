@@ -14,7 +14,7 @@ class IngredientManager:
                 ingredient = row['ingredient']
                 quantity = row['quantity']
                 ingredients[ingredient] = {
-                    'quantity': float(quantity),  # ensure float
+                    'quantity': float(quantity),  
                     'unit': row['unit'],
                     'purchase_date': row['purchase_date'],
                     'expiry_date': row['expiry_date']
