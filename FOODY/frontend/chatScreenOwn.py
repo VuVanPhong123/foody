@@ -59,7 +59,7 @@ class ChatScreenCus(Screen):
 
     def on_pre_enter(self, *args):
         self.load_messages()
-        self.refresh_event = Clock.schedule_interval(lambda dt: self.load_messages(), 3)
+        self.refresh_event = Clock.schedule_interval(lambda dt: self.load_messages(), 10)
     def on_leave(self, *args):
         if self.refresh_event:
             self.refresh_event.cancel()
