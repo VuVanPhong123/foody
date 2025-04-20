@@ -100,6 +100,7 @@ class LogScreen(Screen):
                 self.manager.current = 'mainscreen'
             else:
                 self.show_error("Mật khẩu sai!")
+                self.manager.current = "mainscreen"
         except Exception as e:
             self.show_error(f"Lỗi kết nối: {e}")
 

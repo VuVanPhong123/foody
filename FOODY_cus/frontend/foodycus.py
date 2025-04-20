@@ -6,7 +6,8 @@ from frontend.reviewScreen import ReviewScreen
 from frontend.chatScreenCus import ChatScreenCus
 from frontend.changePasswordScreenCus import ChangePasswordScreen
 from frontend.signupScreencus import SignUpScreen
-from frontend.geminiChatScreen import GeminiChatScreen  # ✅ NEW
+from frontend.geminiChatScreen import GeminiChatScreen
+from frontend.aiChatScreen import AIChatScreen
 
 from kivy.uix.screenmanager import ScreenManager, FallOutTransition
 from kivymd.app import MDApp
@@ -22,5 +23,6 @@ class Foody(MDApp):
         sm.add_widget(ReviewScreen(name="review"))
         sm.add_widget(ChatScreenCus(name="chat"))
         sm.add_widget(ChangePasswordScreen(name="changepass"))
-        sm.add_widget(GeminiChatScreen(name="gemini"))  # ✅ ADD HERE
+        sm.add_widget(GeminiChatScreen(name="gemini"))
+        sm.add_widget(AIChatScreen(name="ai_chat"))
         return sm

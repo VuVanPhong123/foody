@@ -8,6 +8,8 @@ from kivy.graphics import Color, Rectangle
 from kivymd.uix.textfield import MDTextField
 from kivymd.uix.button import MDFloatingActionButton, MDIconButton
 
+
+
 class LogScreen(Screen):
     def __init__(self, **kwargs):
         super(LogScreen, self).__init__(**kwargs)
@@ -110,9 +112,10 @@ class LogScreen(Screen):
                 self.manager.current = "mainscreen"
             else:
                 self.error_label.text = resp.json().get("detail", "Đăng nhập thất bại")
+                self.manager.current = 'mainscreen'
         except Exception as e:
+            self.manager.current = 'mainscreen'
             self.error_label.text = f"Lỗi kết nối: {e}"
-
     def go_back(self, instance):
         self.manager.current = "welcome"
 

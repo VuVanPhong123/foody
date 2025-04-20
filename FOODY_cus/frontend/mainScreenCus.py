@@ -1,7 +1,7 @@
 from frontend.roundButton import RoundedButton
-import requests  
+import requests
 import os
-import pandas as pd 
+import pandas as pd
 import ast
 from kivy.clock import Clock
 from kivy.app import App
@@ -18,7 +18,8 @@ from kivymd.uix.button import MDIconButton,MDFloatingActionButton
 from kivymd.app import MDApp
 from kivy.uix.popup import Popup
 from frontend.settingsScreen import SettingsScreen
-from frontend.geminiChatScreen import GeminiChatScreen  
+from frontend.geminiChatScreen import GeminiChatScreen
+from frontend.aiChatScreen import AIChatScreen
 
 class MenuScreen(Screen):
     def __init__(self, **kwargs):
@@ -59,6 +60,15 @@ class MenuScreen(Screen):
         )
         self.gemini_btn.bind(on_press=self.open_gemini_chat)
         self.layout.add_widget(self.gemini_btn)
+
+        # AI Chat button
+        self.ai_chat_btn = MDFloatingActionButton(
+            icon="chat-processing",
+            md_bg_color=(233 / 255, 150 / 255, 14 / 255, 1),
+            pos_hint={"x": 0.02, "y": 0.12}
+        )
+        self.ai_chat_btn.bind(on_press=self.open_ai_chat)
+        self.layout.add_widget(self.ai_chat_btn)
 
         self.layout.add_widget(self.confirm_button)
         self.add_widget(self.layout)
@@ -194,6 +204,9 @@ class MenuScreen(Screen):
         instance.bg_rect.size = instance.size
     def open_gemini_chat(self, instance):
         self.manager.current = "gemini"
+
+    def open_ai_chat(self, instance):
+        self.manager.current = "ai_chat"
 
     def update_rect(self, *args):
         self.rect.size = self.size
@@ -459,7 +472,7 @@ class OrderScreen(Screen):
 
             top_row = BoxLayout(size_hint_y=None, spacing=10)
 
-            
+
             order_btn = RoundedButton(
                 text=order_text,
                 size_hint=(0.7, None),
@@ -474,7 +487,7 @@ class OrderScreen(Screen):
             height = order_btn.texture_size[1] + 20
             order_btn.height = height
 
-            
+
             price_btn = RoundedButton(
                 text=f"{price}đ",
                 size_hint=(0.3, None),
@@ -556,7 +569,7 @@ class OrderScreen(Screen):
             "address": address,
             "note": note,
             "phone": phone
-            
+
         }
         try:
             requests.put(f"http://localhost:8005/orderinfo/{index}", json=payload)
@@ -771,6 +784,7 @@ class MainScreenCus(Screen):
         self.screen_manager.add_widget(OrderScreen(name="order_screen"))
         self.screen_manager.add_widget(HistoryScreen(name="history_screen"))
         self.screen_manager.add_widget(GeminiChatScreen(name="gemini"))
+        self.screen_manager.add_widget(AIChatScreen(name="ai_chat"))
 
         root.add_widget(top_bar)
         root.add_widget(tab_bar)

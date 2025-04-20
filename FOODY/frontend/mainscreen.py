@@ -5,12 +5,13 @@ from frontend.ingredient import Ingredients
 from frontend.revenue import Revenue
 from frontend.reviewViewerScreen import ReviewViewerScreen
 from frontend.settingsScreenOwner import SettingsScreenOwner
+from frontend.aiChatScreen import AIChatScreen
 from kivy.app import App
 from kivy.uix.label import Label
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.screenmanager import Screen, ScreenManager, FallOutTransition
 from kivy.graphics import Color, Rectangle
-from kivymd.uix.button import MDIconButton
+from kivymd.uix.button import MDIconButton, MDFloatingActionButton
 from kivymd.app import MDApp
 
 class MainScreen(Screen):
@@ -34,18 +35,18 @@ class MainScreen(Screen):
 
         self.greeting_label = Label(
             text='FOODY',
-            
+
             color=(0, 0, 0, 1),
             halign="left",
             valign="middle",
             size_hint=(0.4,1 ),
-            
+
         )
         self.greeting_label.bind(size=self.greeting_label.setter('text_size'))
         self.bind(size=self.update_font_size)
 
         self.date_label = Label(
-            text=self.get_vietnamese_date_string(),  
+            text=self.get_vietnamese_date_string(),
             font_size=(self.width+self.height)/2 * 0.035,
             color=(0, 0, 0, 1),
             halign="right",
@@ -98,6 +99,16 @@ class MainScreen(Screen):
         self.screen_manager.add_widget(Revenue(name="doanh_thu"))
         self.screen_manager.add_widget(Ingredients(name="nguyen_lieu"))
         self.screen_manager.add_widget(ReviewViewerScreen(name="phan_hoi"))
+        self.screen_manager.add_widget(AIChatScreen(name="ai_chat"))
+
+        # AI Chat button
+        self.ai_chat_btn = MDFloatingActionButton(
+            icon="chat-processing",
+            md_bg_color=(233/255, 150/255, 14/255, 1),
+            pos_hint={"right": 0.98, "y": 0.02}
+        )
+        self.ai_chat_btn.bind(on_press=self.open_ai_chat)
+        self.add_widget(self.ai_chat_btn)
 
 
         root.add_widget(top_bar)
@@ -105,12 +116,12 @@ class MainScreen(Screen):
         root.add_widget(self.screen_manager)
         self.add_widget(root)
 
-        
+
         if self.buttons:
             self.select_tab(self.buttons[0], "don_hang")
 
     def get_vietnamese_date_string(self):
-        
+
         days_vn = ["Thứ Hai","Thứ Ba","Thứ Tư","Thứ Năm","Thứ Sáu","Thứ Bảy","Chủ Nhật"]
         now = datetime.now()
         weekday_idx = now.weekday()
@@ -138,6 +149,9 @@ class MainScreen(Screen):
     def update_button_font_size(self, *args):
         for btn in self.buttons:
             btn.font_size = (self.width+self.height)/2 / 36
+
+    def open_ai_chat(self, instance):
+        self.manager.current = "ai_chat"
 
 
 class MyApp(MDApp):
