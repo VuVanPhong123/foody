@@ -62,7 +62,7 @@ class Revenue(Screen):
         self.select_period(day_btn, 'day')
     def on_pre_enter(self, *args):
         self.refresh_data()
-        self.refresh_event = Clock.schedule_interval(lambda dt: self.refresh_data(), 3)
+        self.refresh_event = Clock.schedule_interval(lambda dt: self.refresh_data(), 10)
 
     def on_leave(self, *args):
         if self.refresh_event:
