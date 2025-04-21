@@ -10,8 +10,36 @@ from kivy.clock import Clock, mainthread
 import requests
 from threading import Thread
 
+from kivy.uix.stencilview import StencilView
+from kivy.uix.image import Image
+from kivy.graphics import Ellipse
+
+class CircularAvatar(StencilView):
+    def __init__(self, image_path, size=(40, 40), **kwargs):
+        super().__init__(**kwargs)
+        self.size_hint = (None, None)
+        self.size = size
+
+        with self.canvas:
+            self.mask = Ellipse(size=self.size, pos=self.pos)
+        self.bind(pos=self.update_mask, size=self.update_mask)
+
+        self.image = Image(source=image_path, size=self.size, size_hint=(None, None), pos=self.pos)
+        self.add_widget(self.image)
+        self.image.bind(pos=self.update_image_pos)
+
+    def update_mask(self, *args):
+        self.mask.pos = self.pos
+        self.mask.size = self.size
+
+    def update_image_pos(self, *args):
+        self.image.pos = self.pos
+
+
+
 
 class Converstaion:
+    
     def __init__(self):
         self.messages = []
 
@@ -95,7 +123,7 @@ class AIChatScreen(Screen):
             text=full_text,
             size_hint=(None, None),
             width=320,
-            halign="left",
+            halign="right",
             valign="middle",
             text_size=(280, None)
         )
@@ -140,8 +168,8 @@ class AIChatScreen(Screen):
         
         # Send request to AI service
         pass
-    def make_ai_req(self, payload):
-        response = requests.post("http://localhost:8013/chat", json=payload)
+    def make_ai_req(self, payload, base_url = "http://localhost:8013/chat"):
+        response = requests.post(base_url, json=payload)
         if response.status_code == 200:
             self.add_assistant_message(response.text)
         else:

@@ -8,6 +8,8 @@ from kivy.graphics import Color, Rectangle
 from kivymd.uix.textfield import MDTextField
 from kivymd.uix.button import MDFloatingActionButton, MDIconButton
 
+
+
 class LogScreen(Screen):
     def __init__(self, **kwargs):
         super(LogScreen, self).__init__(**kwargs)

@@ -246,6 +246,12 @@ class CartScreen(Screen):
         self.layout.add_widget(self.scroll)
         self.layout.add_widget(self.buy_all_button)
         self.add_widget(self.layout)
+    def delete_cart_item(self, row):
+        try:
+            requests.delete("http://localhost:8004/cart", json=row)
+            self.load_cart()
+        except Exception as e:
+            self.show_warning("Lỗi khi xóa sản phẩm: " + str(e))
 
     def load_cart(self):
         self.container.clear_widgets()
@@ -312,12 +318,31 @@ class CartScreen(Screen):
             )
             mua_btn.bind(on_press=lambda _, row=row: self.show_order_popup([row]))
 
+            canlel_btn = Button(
+                text="Hủy",
+                size_hint=(1, None),
+                height=50,
+                background_color=(0.8, 0.2, 0.2, 1),
+                color=(1, 1, 1, 1),
+            )
+
+            canlel_btn.bind(on_press=lambda _, row=row: self.delete_cart_item(row))
+
+            optional_layout = BoxLayout(
+                size_hint_y=0.4,
+                spacing=10,
+                height=50
+            )
+            optional_layout.add_widget(mua_btn)
+            optional_layout.add_widget(canlel_btn)
+
             top_row.add_widget(order_btn)
             top_row.add_widget(price_btn)
             order_box.add_widget(top_row)
-            order_box.add_widget(mua_btn)
+            order_box.add_widget(optional_layout)
 
             self.container.add_widget(order_box)
+       
 
     def show_order_popup(self, rows):
         content = BoxLayout(orientation='vertical', padding=10, spacing=10)
