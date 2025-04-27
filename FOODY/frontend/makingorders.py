@@ -8,7 +8,7 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.screenmanager import Screen
 from kivy.graphics import Color, Rectangle
 from kivymd.app import MDApp
-
+import pandas as pd
 from frontend.roundButton import RoundedButton
 
 
@@ -83,7 +83,7 @@ class Makingorders(Screen):
             url = "http://localhost:8001/menu"
             resp = requests.get(url)
             if resp.status_code == 200:
-                return resp.json()  # might be a dict or list
+                return resp.json()  
             else:
                 print("Error fetching menu:", resp.text)
                 return {}
@@ -191,30 +191,30 @@ class Makingorders(Screen):
         self.toggle_menu(None)
 
     def complete_revenue(self, done_orders, total_price, row_box):
-    try:
-        now = pd.Timestamp.now()
-        payload = {
-            "done_orders": done_orders.replace("\n", ", "),
-            "price": total_price,
-            "time": now.strftime("%H:%M:%S"),
-            "date": now.strftime("%Y-%m-%d")
-        }
-        resp = requests.post("http://localhost:8002/revenue", json=payload)
-        if resp.status_code != 200:
-            print("Failed to log revenue:", resp.text)
-    except Exception as e:
-        print("Error sending revenue to backend:", e)
-
-    self.revenue += total_price
-
-    if self.top_manager:
         try:
-            rev_screen = self.top_manager.get_screen("doanh_thu")
-            rev_screen.refresh_data()
+            now = pd.Timestamp.now()
+            payload = {
+                "done_orders": done_orders.replace("\n", ", "),
+                "price": total_price,
+                "time": now.strftime("%H:%M:%S"),
+                "date": now.strftime("%Y-%m-%d")
+            }
+            resp = requests.post("http://localhost:8002/revenue", json=payload)
+            if resp.status_code != 200:
+                print("Failed to log revenue:", resp.text)
         except Exception as e:
-            print("Could not refresh revenue:", e)
+            print("Error sending revenue to backend:", e)
 
-    self.remove_order(row_box)
+        self.revenue += total_price
+
+        if self.top_manager:
+            try:
+                rev_screen = self.top_manager.get_screen("doanh_thu")
+                rev_screen.refresh_data()
+            except Exception as e:
+                print("Could not refresh revenue:", e)
+
+        self.remove_order(row_box)
 
     def remove_order(self, order_widget):
         self.order_layout.remove_widget(order_widget)
