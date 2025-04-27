@@ -1,15 +1,22 @@
-from kivy.uix.screenmanager import Screen
-from kivy.uix.scrollview import ScrollView
-from kivy.uix.boxlayout import BoxLayout
-from kivy.graphics import Color, Rectangle
+# frontend/reviewViewerScreen.py
+import threading, requests
 from kivy.uix.label import Label
-from frontend.roundButton import RoundedButton
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.scrollview import ScrollView
+from kivy.uix.screenmanager import Screen
+from kivy.graphics import Color, Rectangle
 from kivy.clock import Clock
-import requests
+from kivymd.uix.spinner import MDSpinner
+
+from frontend.roundButton import RoundedButton
+
 
 class ReviewViewerScreen(Screen):
+    ENDPOINT      = "http://localhost:8008/review"
+    AUTO_REFRESH  = 30  
+
     def __init__(self, **kwargs):
-        super(ReviewViewerScreen, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
         with self.canvas.before:
             Color(245 / 255, 177 / 255, 67 / 255, 1)
@@ -17,89 +24,104 @@ class ReviewViewerScreen(Screen):
         self.bind(size=self.update_rect, pos=self.update_rect)
 
         self.layout = BoxLayout(orientation='vertical', spacing=10, padding=10)
-        self.avg_label = Label(
-            text="Đang tính toán...",
-            font_size=18,
-            size_hint_y=None,
-            height=30,
-            color=(0, 0, 0, 1)
-        )
+
+        self.avg_label = Label(text="", font_size=18, size_hint_y=None,
+                               height=30, color=(0, 0, 0, 1))
         self.layout.add_widget(self.avg_label)
 
-        self.scroll = ScrollView(size_hint=(1, 1))
-        self.container = BoxLayout(orientation='vertical', size_hint_y=None, spacing=10, padding=10)
+        self.scroll = ScrollView()
+        self.container = BoxLayout(orientation='vertical', size_hint_y=None,
+                                   spacing=10, padding=10)
         self.container.bind(minimum_height=self.container.setter('height'))
         self.scroll.add_widget(self.container)
         self.layout.add_widget(self.scroll)
-
         self.add_widget(self.layout)
-        self.refresh_event = None
 
-    def update_rect(self, *args):
+        self.spinner = None
+        self.refresh_ev = None
+
+    def show_spinner(self):
+        if self.spinner is None:
+            self.spinner = MDSpinner(size_hint=(None, None), size=(46, 46),
+                                     line_width=3, color=(1, 1, 1, 1),
+                                     pos_hint={'center_x': .5, 'y': 0})
+            self.layout.add_widget(self.spinner)
+
+    def hide_spinner(self):
+        if self.spinner:
+            self.layout.remove_widget(self.spinner)
+            self.spinner = None
+
+    def update_rect(self, *_):
         self.rect.size = self.size
-        self.rect.pos = self.pos
+        self.rect.pos  = self.pos
 
-    def on_pre_enter(self, *args):
-        self.load_reviews()
-        self.refresh_event = Clock.schedule_interval(lambda dt: self.load_reviews(), 5)
-    def on_leave(self, *args):
-        if self.refresh_event:
-            self.refresh_event.cancel()
-            self.refresh_event = None
-    def load_reviews(self):
-        self.container.clear_widgets()
+    def on_pre_enter(self, *_):
+        self._load_async()
+        self.refresh_ev = Clock.schedule_interval(lambda dt: self._load_async(),
+                                                  self.AUTO_REFRESH)
+
+    def on_leave(self, *_):
+        if self.refresh_ev:
+            self.refresh_ev.cancel()
+            self.refresh_ev = None
+
+    def _load_async(self):
+        self.show_spinner()
+        self.avg_label.text = "Đang tải đánh giá…"
+        threading.Thread(target=self._worker, daemon=True).start()
+
+    def _worker(self):
         try:
-            resp = requests.get("http://localhost:8008/review")
+            resp = requests.get(self.ENDPOINT, timeout=5)
+            resp.raise_for_status()
             reviews = resp.json()
+            error = None
         except Exception as e:
+            reviews, error = None, str(e)
+
+        Clock.schedule_once(lambda dt: self._after_load(reviews, error))
+
+    def _after_load(self, reviews, error):
+        self.hide_spinner()
+        self.container.clear_widgets()
+
+        if error:
             self.avg_label.text = "Lỗi khi tải đánh giá"
-            self.container.add_widget(Label(text=f"Lỗi tải đánh giá: {e}", color=(1, 0, 0, 1)))
+            self.container.add_widget(Label(text=f"Lỗi: {error}",
+                                            color=(1, 0, 0, 1)))
             return
 
         if not reviews:
             self.avg_label.text = "Chưa có đánh giá nào"
-            self.container.add_widget(Label(text="Chưa có đánh giá nào", font_size=18, color=(0, 0, 0, 1)))
+            self.container.add_widget(Label(text="Chưa có đánh giá nào",
+                                            font_size=18, color=(0, 0, 0, 1)))
             return
 
-        total_stars = sum(r.get("stars", 0) for r in reviews)
-        avg_stars = total_stars / len(reviews)
-        self.avg_label.text = f"Đánh giá trung bình: {avg_stars:.1f} sao ({len(reviews)} đánh giá)"
+        avg = sum(r["stars"] for r in reviews) / len(reviews)
+        self.avg_label.text = (f"Đánh giá trung bình: {avg:.1f} sao "
+                               f"({len(reviews)} đánh giá)")
 
-        for review in reviews:
-            stars = review.get("stars", 0)
-            comment = review.get("comment", "")
+        for r in reviews:
+            stars, comment = r["stars"], r["comment"]
 
-            temp_btn = RoundedButton(
-                text=comment,
-                size_hint=(0.7, None),
-                halign="left",
-                valign="middle",
-                text_size=(self.width * 0.65, None)
-            )
-            temp_btn.texture_update()
-            calculated_height = temp_btn.texture_size[1] + 20
+            probe = RoundedButton(text=comment, size_hint=(.7, None),
+                                  text_size=(self.width * .65, None))
+            probe.texture_update()
+            h = probe.texture_size[1] + 20
 
-            comment_btn = RoundedButton(
-                text=comment,
-                size_hint=(0.7, None),
-                height=calculated_height,
-                halign="left",
-                valign="middle"
-            )
-            comment_btn.change_color(233 / 255, 150 / 255, 14 / 255, 1)
+            comment_btn = RoundedButton(text=comment, size_hint=(.7, None),
+                                        height=h, halign="left", valign="middle")
+            comment_btn.change_color(233/255,150/255,14/255,1)
             comment_btn.color = (0, 0, 0, 1)
-            comment_btn.text_size = (self.width * 0.65 - 20, None)
-            comment_btn.texture_update()
+            comment_btn.text_size = (self.width * .65 - 20, None)
 
-            stars_btn = RoundedButton(
-                text=f"{stars} stars",
-                size_hint=(0.3, None),
-                height=comment_btn.height
-            )
-            stars_btn.change_color(233 / 255, 150 / 255, 14 / 255, 1)
+            stars_btn   = RoundedButton(text=f"{stars} stars", size_hint=(.3, None),
+                                        height=h)
+            stars_btn.change_color(233/255,150/255,14/255,1)
             stars_btn.color = (0, 0, 0, 1)
 
-            row = BoxLayout(size_hint_y=None, height=comment_btn.height, spacing=10)
+            row = BoxLayout(size_hint_y=None, height=h, spacing=10)
             row.add_widget(stars_btn)
             row.add_widget(comment_btn)
             self.container.add_widget(row)
