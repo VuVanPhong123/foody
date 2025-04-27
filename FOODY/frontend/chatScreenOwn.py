@@ -1,126 +1,160 @@
+import threading, requests, hashlib
+from functools import partial
 from kivy.uix.screenmanager import Screen
-from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.boxlayout  import BoxLayout
 from kivy.uix.scrollview import ScrollView
-from kivy.uix.textinput import TextInput
-from kivy.uix.button import Button
-from kivymd.uix.button import MDFloatingActionButton
-from kivy.graphics import Color, Rectangle
+from kivy.uix.textinput  import TextInput
+from kivy.uix.button      import Button
+from kivymd.uix.button    import MDFloatingActionButton
+from kivymd.uix.spinner   import MDSpinner
+from kivy.clock           import Clock
+from kivy.graphics        import Color, Rectangle
 from frontend.roundButton import RoundedButton
-from kivy.clock import Clock
-import requests
 
-class ChatScreenCus(Screen):
-    def __init__(self, **kwargs):
-        super(ChatScreenCus, self).__init__(**kwargs)
 
+class ChatScreenOwn(Screen):
+    ENDPOINT = "http://localhost:8009/chat"
+    POLL_SEC = 3
+
+    def __init__(self, **kw):
+        super().__init__(**kw)
         with self.canvas.before:
-            Color(245 / 255, 177 / 255, 67 / 255, 1)
-            self.rect = Rectangle(size=self.size, pos=self.pos)
-        self.bind(size=self.update_rect, pos=self.update_rect)
+            Color(245/255, 177/255, 67/255, 1)
+            self.bg = Rectangle(size=self.size, pos=self.pos)
+        self.bind(size=self._bg, pos=self._bg)
 
-        main_layout = BoxLayout(orientation='vertical')
+        root = BoxLayout(orientation="vertical")
 
-        top_bar = BoxLayout(size_hint=(1, 0.15), padding=10)
-        back_btn = MDFloatingActionButton(
-            icon="arrow-left",
-            md_bg_color=(233 / 255, 150 / 255, 14 / 255, 1),
-            icon_color=(0, 0, 0, 1),
-            size_hint=(None, None),
-            size=("20dp", "20dp")
+        top = BoxLayout(size_hint=(1, .12), padding=10)
+        top.add_widget(
+            MDFloatingActionButton(icon="arrow-left",
+                                   md_bg_color=(233/255, 150/255, 14/255, 1),
+                                   icon_color=(0, 0, 0, 1),
+                                   on_press=lambda *_:
+                                   setattr(self.manager, "current", "settings_owner"))
         )
-        back_btn.bind(on_press=self.go_back)
-        top_bar.add_widget(back_btn)
 
-        self.scroll = ScrollView(size_hint=(1, 0.82))
-        self.container = BoxLayout(orientation='vertical', size_hint_y=None, spacing=10, padding=10)
-        self.container.bind(minimum_height=self.container.setter('height'))
-        self.scroll.add_widget(self.container)
+        self.scroll = ScrollView(size_hint=(1, .78))
+        self.box = BoxLayout(orientation="vertical", size_hint_y=None,
+                             spacing=10, padding=10)
+        self.box.bind(minimum_height=self.box.setter("height"))
+        self.scroll.add_widget(self.box)
 
-        input_row = BoxLayout(size_hint=(1, 0.1), spacing=10, padding=10)
-        self.input_text = TextInput(hint_text="Nhập tin nhắn", size_hint=(0.8, 1), multiline=False)
-        send_btn = Button(text="Gửi", size_hint=(0.2, 1), background_color=(233 / 255, 150 / 255, 14 / 255, 1))
-        send_btn.bind(on_press=self.send_message)
-        input_row.add_widget(self.input_text)
-        input_row.add_widget(send_btn)
+        bottom = BoxLayout(size_hint=(1, .10), spacing=10, padding=10)
+        self.txt = TextInput(multiline=False, hint_text="Nhập tin nhắn",
+                             size_hint=(.8, 1))
+        self.btn = Button(text="Gửi", size_hint=(.2, 1),
+                          background_color=(233/255, 150/255, 14/255, 1),
+                          on_press=self._send)
+        bottom.add_widget(self.txt)
+        bottom.add_widget(self.btn)
 
-        main_layout.add_widget(top_bar)
-        main_layout.add_widget(self.scroll)
-        main_layout.add_widget(input_row)
-        self.add_widget(main_layout)
-        self.refresh_event = None
-        self.load_messages()
+        root.add_widget(top)
+        root.add_widget(self.scroll)
+        root.add_widget(bottom)
+        self.add_widget(root)
 
-    def update_rect(self, *args):
-        self.rect.size = self.size
-        self.rect.pos = self.pos
+        self.last_id = 0
+        self.seen_ids = set()
+        self.pending = {}
+        self.polling = False
+        self.poll_ev = None
 
-    def go_back(self, instance):
-        self.manager.current = "settings_owner"
+        self.center_spin = MDSpinner(size_hint=(None, None), size=(46, 46),
+                                     line_width=3,
+                                     pos_hint={"center_x": .5, "center_y": .5})
+        self.center_spin.active = True
+        self.add_widget(self.center_spin)
 
-    def on_pre_enter(self, *args):
-        self.load_messages()
-        self.refresh_event = Clock.schedule_interval(lambda dt: self.load_messages(), 10)
-    def on_leave(self, *args):
-        if self.refresh_event:
-            self.refresh_event.cancel()
-            self.refresh_event = None
-    def load_messages(self):
-        self.container.clear_widgets()
-        try:
-            resp = requests.get("http://localhost:8009/chat")
-            messages = resp.json()
-        except Exception as e:
-            self.container.add_widget(RoundedButton(
-                text=f"Lỗi tải tin nhắn: {e}",
-                size_hint=(None, None),
-                width=320,
-                pos_hint={"x": 0}
-            ))
+    def _bg(self, *_):
+        self.bg.size, self.bg.pos = self.size, self.pos
+
+    def _hash(self, s, m):
+        return hashlib.md5(f"{s}:{m}".encode()).hexdigest()
+
+    def _bubble(self, sender, msg, mine):
+        col = (233/255, 150/255, 14/255, 1) if mine else (0.9, 0.4, 0.1, 1)
+        b = RoundedButton(text=f"{sender}:\n{msg}", size_hint=(None, None),
+                          width=320, halign="left", valign="middle",
+                          text_size=(280, None))
+        b.change_color(*col)
+        b.color = (0, 0, 0, 1)
+        b.bind(texture_size=lambda w, s: setattr(w, "height", s[1] + 20))
+        self.box.add_widget(b)
+        return b
+
+    def _scroll_bottom(self):
+        Clock.schedule_once(lambda *_: setattr(self.scroll, "scroll_y", 0), 0)
+
+    def on_pre_enter(self, *_):
+        self._poll()
+        self.poll_ev = Clock.schedule_interval(lambda dt: self._poll(), self.POLL_SEC)
+
+    def on_leave(self, *_):
+        if self.poll_ev:
+            self.poll_ev.cancel()
+            self.poll_ev = None
+
+    def _poll(self):
+        if self.polling:
             return
+        self.polling = True
+        threading.Thread(target=self._poll_worker, daemon=True).start()
 
-        for msg in messages:
-            sender, content, color = "", "", ()
+    def _poll_worker(self):
+        try:
+            rows = requests.get(f"{self.ENDPOINT}?after_id={self.last_id}", timeout=3).json()
+        except Exception:
+            rows = []
+        Clock.schedule_once(partial(self._after_poll, rows))
 
-            if msg.get("owner"):
-                sender = "Me"
-                content = msg["owner"]
-            elif msg.get("customer"):
-                sender = "Customer"
-                content = msg["customer"]
+    def _after_poll(self, rows, *_):
+        self.polling = False
+        if self.center_spin.parent and rows:
+            self.remove_widget(self.center_spin)
 
-            full_text = f"{sender}:\n{content}"
+        for r in rows:
+            rid = r["id"]
+            self.last_id = max(self.last_id, rid)
+            if rid in self.seen_ids:
+                continue
 
-            msg_btn = RoundedButton(
-                text=full_text,
-                size_hint=(None, None),
-                width=320,
-                halign="left",
-                valign="middle",
-                text_size=(280, None)
-            )
-            if sender=="Me":
-                msg_btn.change_color(233 / 255, 150 / 255, 14 / 255, 1)
-            else:
-                msg_btn.change_color(0.9, 0.4, 0.1, 1)
-            msg_btn.color = (0, 0, 0, 1)
-            msg_btn.bind(texture_size=lambda b, ts: setattr(b, 'height', ts[1] + 20))
-            msg_btn.pos_hint = {"x": 0}
-            self.container.add_widget(msg_btn)
-            Clock.schedule_once(lambda dt: setattr(self.scroll, 'scroll_y', 0), 0.1)
+            if r.get("owner"):
+                h = self._hash("Me", r["owner"])
+                if h in self.pending:
+                    self.pending.pop(h).text = f"Me:\n{r['owner']}"
+                else:
+                    self._bubble("Me", r["owner"], mine=True)
 
-    def send_message(self, instance):
-        text = self.input_text.text.strip()
+            if r.get("customer"):
+                self._bubble("Customer", r["customer"], mine=False)
+
+            self.seen_ids.add(rid)
+
+        if rows:
+            self._scroll_bottom()
+
+    def _send(self, *_):
+        text = self.txt.text.strip()
         if not text:
             return
-        payload = {
-            "sender": "owner",
-            "message": text
-        }
+        self.txt.text = ""
+        h = self._hash("Me", text)
+        if h in self.pending:
+            return
+        self.pending[h] = self._bubble("Me", text, mine=True)
+        self._scroll_bottom()
+        threading.Thread(target=self._send_worker, args=(text, h), daemon=True).start()
 
+    def _send_worker(self, text, h):
         try:
-            resp = requests.post("http://localhost:8009/chat", json=payload)
-            if resp.status_code == 200:
-                self.input_text.text = ""
-                self.load_messages()
-        except Exception as e:
-            print("Send failed:", e)
+            ok = requests.post(self.ENDPOINT,
+                               json={"sender": "owner", "message": text},
+                               timeout=3).status_code == 201
+        except Exception:
+            ok = False
+
+        if not ok:
+            Clock.schedule_once(
+                lambda *_: setattr(self.pending.pop(h, None), 'text', "(!)\n[Không gửi được]")
+            )

@@ -1,3 +1,4 @@
+# frontend/onlineorders.py
 import threading, requests
 from kivy.uix.screenmanager import Screen
 from kivy.uix.scrollview import ScrollView
@@ -14,7 +15,7 @@ from frontend.roundButton import RoundedButton
 
 class Onlineorders(Screen):
     ENDPOINT      = "http://localhost:8006/onlineorders"
-    AUTO_REFRESH  = 15 
+    AUTO_REFRESH  = 30  
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

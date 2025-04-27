@@ -14,7 +14,7 @@ from kivymd.app import MDApp
 
 class Revenue(Screen):
     BASE_URL      = "http://localhost:8002/revenue"
-    AUTO_REFRESH  = 30  
+    AUTO_REFRESH  = 30  # seconds
     ENDPOINT_MAP  = {
         "day":   "daily",
         "week":  "weekly",
@@ -25,11 +25,13 @@ class Revenue(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+        # ---------- background -------------------------------------------------
         with self.canvas.before:
             Color(245 / 255, 177 / 255, 67 / 255, 1)
             self.rect = Rectangle(size=self.size, pos=self.pos)
         self.bind(size=self.update_rect, pos=self.update_rect)
 
+        # ---------- top bar ----------------------------------------------------
         self.main_layout = BoxLayout(orientation="vertical", spacing=5, padding=5)
         self.add_widget(self.main_layout)
 
@@ -46,6 +48,7 @@ class Revenue(Screen):
             self.period_bar.add_widget(b)
             self.btns[p] = b
 
+        # ---------- scroll area ------------------------------------------------
         self.scroll = ScrollView()
         self.main_layout.add_widget(self.scroll)
 
@@ -54,10 +57,10 @@ class Revenue(Screen):
         self.scroll.add_widget(self.table_layout)
 
         self.total_label = Label(size_hint_y=None, height="40dp",
-                                 font_size="18sp", color=(0,0,0,1))
+                                 font_size="18sp", color=(0, 0, 0,1))
         self.main_layout.add_widget(self.total_label)
 
-
+        # ---------- state ------------------------------------------------------
         self.active_btn = None
         self.period     = "day"
         self.cache      = {}
@@ -65,6 +68,7 @@ class Revenue(Screen):
 
         self.select_period(self.btns["day"], "day")
 
+    # --------------------------------------------------------------------- Kivy
     def on_pre_enter(self, *args):
         # explicit first fetch
         self._auto_refresh(0)
@@ -77,6 +81,7 @@ class Revenue(Screen):
             self.refresh_ev.cancel()
             self.refresh_ev = None
 
+    # ------------------------------------------------------------------ helpers
     def update_rect(self, *args):
         self.rect.size = self.size
         self.rect.pos  = self.pos
@@ -84,6 +89,7 @@ class Revenue(Screen):
     def format_money(self, val: int) -> str:
         return f"{val:,}".replace(",", ".")
 
+    # ------------------------------------------------------------------ actions
     def select_period(self, button, period):
         if self.active_btn and self.active_btn is not button:
             self.active_btn.background_color = (233/255,150/255,14/255,1)
@@ -91,11 +97,14 @@ class Revenue(Screen):
         self.active_btn = button
         self.period     = period
 
-        self.build_table(self.cache.get(period, None))   
-        self._fetch_async(period)                        
+        self.build_table(self.cache.get(period, None))   # immediate (maybe None)
+        self._fetch_async(period)                        # then fresh data
+
+    # called by timer
     def _auto_refresh(self, dt):
         self._fetch_async(self.period)
 
+    # ----------------------------------------------------------- networking ----
     def _fetch_async(self, period):
         def worker():
             try:
@@ -113,6 +122,7 @@ class Revenue(Screen):
         if self.period == period:
             self.build_table(data)
 
+    # ----------------------------------------------------------- UI building ---
     def build_table(self, data):
         self.table_layout.clear_widgets()
         if not data or not data.get("rows"):
@@ -202,7 +212,7 @@ class Revenue(Screen):
 
             self.total_label.text = f"Doanh thu tháng này: {self.format_money(total_sum)} VND"
 
-        else:  
+        else:  # total
             for r in rows:
                 row = mk_row()
                 btn_left = Button(text=r["year_month"], size_hint=(0.5, 1),
