@@ -1,4 +1,3 @@
-# frontend/reviewViewerScreen.py
 import threading, requests
 from kivy.uix.label import Label
 from kivy.uix.boxlayout import BoxLayout
