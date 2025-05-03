@@ -1,0 +1,7 @@
+README.md
+setup.py
+FOODY_cus.egg-info/PKG-INFO
+FOODY_cus.egg-info/SOURCES.txt
+FOODY_cus.egg-info/dependency_links.txt
+FOODY_cus.egg-info/requires.txt
+FOODY_cus.egg-info/top_level.txt
