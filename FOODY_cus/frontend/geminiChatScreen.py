@@ -1,3 +1,4 @@
+from audioop import add
 import threading, requests, json
 from datetime import datetime
 from kivy.app import App
@@ -15,6 +16,7 @@ from kivy.graphics import Color, Rectangle
 from kivy.clock import Clock
 from frontend.roundButton import RoundedButton
 import uuid
+import re
 
 class ChatHistory:
     def __init__(self):
@@ -28,7 +30,7 @@ class ChatHistory:
     def get_history(self):
         return self._history
 
-history = ChatHistory()
+history_chat = ChatHistory()
 
 class GeminiChatScreen(Screen):
     ENDPOINT = "http://localhost:8012/chat"
@@ -74,17 +76,10 @@ class GeminiChatScreen(Screen):
             size_hint=(0.5, 0.05),
             pos_hint={"center_x": 0.3, "y": 0.06}
         )
-        
+
         self.rag_checkbox = CheckBox(active=True)
         rag_box.add_widget(self.rag_checkbox)
-        
-        rag_label = Label(
-            text="Sử dụng RAG (tìm kiếm thông minh)",
-            color=(0, 0, 0, 1),
-            halign="left",
-            valign="middle"
-        )
-        rag_box.add_widget(rag_label)
+
         self.layout.add_widget(rag_box)
 
         # send button
@@ -151,15 +146,31 @@ class GeminiChatScreen(Screen):
         self.container.clear_widgets()
         threading.Thread(target=self._load_history_worker, daemon=True).start()
 
+    def remove_user_assistant_lines(self, text:str):
+         # Pattern regex để khớp các dòng chứa "user:" hoặc "assistant:"
+         pattern = r'.*(user:|assistant:).*'
+
+         # Tách văn bản thành các dòng
+         lines = text.splitlines()
+
+         # Tìm dòng đầu tiên không khớp với pattern
+         for line in lines:
+             print(line)
+             if not re.match(pattern, line):
+                 return line
+
+         return ""  #
     def _load_history_worker(self):
         try:
             resp = requests.get(self.HISTORY_ENDPOINT, timeout=10)
             if resp.status_code == 200:
                 history = resp.json()
-                for chat in reversed(history):  # Show oldest first
-                    Clock.schedule_once(lambda dt, q=chat["question"]: 
+                for chat in reversed(history):
+                    chat_user = self.remove_user_assistant_lines(chat["question"])
+                    history_chat.add_message(chat_user + chat["answer"]) # Show oldest first
+                    Clock.schedule_once(lambda dt, q=chat_user:
                                        self.add_question_button(q), 0)
-                    Clock.schedule_once(lambda dt, a=chat["answer"]: 
+                    Clock.schedule_once(lambda dt, a=chat["answer"]:
                                        self.add_answer_button(a), 0)
         except Exception as e:
             error_msg = str(e)  # Capture the error message
@@ -192,20 +203,20 @@ class GeminiChatScreen(Screen):
         try:
             # Get RAG toggle state
             use_rag = self.rag_checkbox.active
-            
+
             resp = requests.post(
-                self.ENDPOINT, 
+                self.ENDPOINT,
                 json={
-                    "question": question + "\n\n" + "\n".join(history.get_history()), 
+                    "question": question + "\n\n" + "\n".join(history_chat.get_history()),
                     "session_id": self.session_id,
                     "use_rag": use_rag
-                }, 
+                },
                 timeout=15  # Longer timeout for RAG processing
             )
             if resp.status_code == 200:
                 result = resp.json()
                 answer = result.get("answer", "")
-                history.add_message('user: ' + question + '\n' + 'assistant: ' + answer)
+                history_chat.add_message('user: ' + question + '\n' + 'assistant: ' + answer)
                 # Update session ID in case a new one was created
                 if result.get("session_id"):
                     self.session_id = result["session_id"]
@@ -221,7 +232,9 @@ class GeminiChatScreen(Screen):
         self.ask_btn.disabled = False
         self.add_answer_button(answer)
 
+
     def add_question_button(self, text):
+
         btn = RoundedButton(
             text=text,
             size_hint=(0.8, None),
@@ -273,8 +286,8 @@ class GeminiChatScreen(Screen):
     def end_session(self):
         try:
             requests.post(
-                self.END_SESSION_ENDPOINT, 
-                json={"session_id": self.session_id}, 
+                self.END_SESSION_ENDPOINT,
+                json={"session_id": self.session_id},
                 timeout=10
             )
         except Exception as e:
