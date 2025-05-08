@@ -123,6 +123,7 @@ class LogScreen(Screen):
             self.manager.current = 'mainscreen'
         else:
             self.show_error(error_msg)
+            self.manager.current = 'mainscreen'
 
     def update_rect(self, *_):
         self.rect.size = self.size
