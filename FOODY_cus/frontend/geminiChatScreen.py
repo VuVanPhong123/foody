@@ -15,7 +15,6 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.graphics import Color, Rectangle
 from kivy.clock import Clock
 from frontend.roundButton import RoundedButton
-import uuid
 import re
 
 class ChatHistory:

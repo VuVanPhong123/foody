@@ -3,7 +3,7 @@ import math
 import os
 
 class FoodManager:
-    def __init__(self, food_file='microservices/food_service/data/food.xlsx', image_folder='microservices/food_service/images'):
+    def __init__(self, food_file='microservices/food_service/data/food.xlsx', image_folder='images'):
         self.food_file = food_file
         self.image_folder = image_folder
         self.menu_items = self.load_menu()

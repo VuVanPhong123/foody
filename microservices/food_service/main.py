@@ -33,17 +33,10 @@ def get_menu():
                 # Validate image
                 if pd.isna(picture) or picture.lower() in ["", "nan"]:
                     continue
-
-                # Normalize image path
-                if os.path.isabs(picture) or os.path.sep in picture:
-                    image_path = picture
-                else:
-                    image_path = os.path.join(IMAGE_FOLDER, picture)
-
                 menu.append({
                     "name": name,
                     "price": price,
-                    "image": image_path
+                    "image": picture
                 })
             except Exception as e:
                 print(f"Skipping row {idx} due to error: {e}")

@@ -1,0 +1,8 @@
+README.md
+pyproject.toml
+setup.py
+foody_cus.egg-info/PKG-INFO
+foody_cus.egg-info/SOURCES.txt
+foody_cus.egg-info/dependency_links.txt
+foody_cus.egg-info/requires.txt
+foody_cus.egg-info/top_level.txt

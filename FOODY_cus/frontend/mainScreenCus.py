@@ -1,5 +1,6 @@
 from frontend.roundButton import RoundedButton
 import os, ast, requests, threading
+import random
 from kivy.clock import Clock
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
@@ -13,10 +14,13 @@ from kivy.uix.screenmanager import Screen, ScreenManager, FallOutTransition
 from kivy.graphics import Color, Rectangle
 from kivymd.uix.button import MDIconButton, MDFloatingActionButton
 from kivymd.uix.spinner import MDSpinner
-from frontend.settingsScreen import SettingsScreen
-from frontend.geminiChatScreen import GeminiChatScreen
 from kivy.app import App
 from functools import partial
+from frontend.weatherRecommendationDialog import WeatherRecommendationDialog
+
+
+
+image_path = "images"
 
 class AsyncMixin:
     def _show_spinner(self):
@@ -71,6 +75,13 @@ class MenuScreen(Screen):
         self.gemini_btn = MDFloatingActionButton(icon="robot",
                                                  md_bg_color=(233/255, 150/255, 14/255, 1),
                                                  pos_hint={'x': .02, 'y': .02})
+        self.weather_rec_btn = MDFloatingActionButton(
+            icon="weather-cloudy",
+            pos_hint={"x": .88, "y": .02},
+            md_bg_color=(233/255, 150/255, 14/255, 1),
+            on_release=self.show_weather_recommendations
+        )
+        self.add_widget(self.weather_rec_btn)
         self.gemini_btn.bind(on_press=self.open_gemini_chat)
         self.layout.add_widget(self.gemini_btn)
 
@@ -89,6 +100,8 @@ class MenuScreen(Screen):
         try:
             r = requests.get("http://localhost:8003/menu", timeout=5)
             data = r.json() if r.status_code == 200 else []
+            for item in data:
+                item['name'] = item['name'].lower().replace('_', ' ')
         except Exception:
             data = []
         Clock.schedule_once(lambda *_: self._after_fetch(data))
@@ -96,6 +109,7 @@ class MenuScreen(Screen):
     def _after_fetch(self, data):
         self._hide_spinner()
         self.menu_items = data
+        random.shuffle(self.menu_items)
         self.selected_quantities = {it['name']: 0 for it in data}
         self.qty_inputs.clear()
         self._build_menu()
@@ -104,7 +118,7 @@ class MenuScreen(Screen):
         self.container.clear_widgets()
         for item in self.menu_items:
             name, price = item['name'], item['price']
-            img = item['image'] if os.path.exists(item['image']) else 'images/default.png'
+            img = f"{image_path}/{item['image']}" if os.path.exists(f"{image_path}/{item['image']}") else f"{image_path}/Bánh_bèo.jpg"
 
             row = BoxLayout(orientation='horizontal', size_hint_y=None, height=100)
             row.add_widget(Image(source=img, size_hint=(.2, 1)))
@@ -151,16 +165,36 @@ class MenuScreen(Screen):
             except ValueError:
                 self.selected_quantities[name] = 0
         return _h
+    def show_weather_recommendations(self, *args):
+        # Get menu items from your data source
+        menu_items = []
+        for product in self.menu_items:
+            menu_items.append(product['name'])
+        
+        dialog = WeatherRecommendationDialog(
+            menu_items=menu_items,
+            add_to_cart_callback=self.save_to_cart
+        )
+        dialog.open()
 
     def _change_qty(self, name, field, delta, *_):
         new_val = max(0, self.selected_quantities[name] + delta)
         self.selected_quantities[name] = new_val
         field.text = str(new_val)
 
-    def save_to_cart(self, *_):
-        if not any(self.selected_quantities.values()):
-            self._popup("Bạn chưa chọn gì!")
-            return
+    def save_to_cart(self, name = None, quantity = None):
+        if name and quantity:
+            try:
+                self.selected_quantities[name] = int(quantity)
+            except KeyError as e:
+                self._popup(f"Lỗi khi thêm vào giỏ hàng {e}.")
+            except TypeError as e:
+                self._popup(f"Lỗi khi thêm vào giỏ hàng {e}.")
+                return
+        else:
+            if not any(self.selected_quantities.values()):
+                self._popup("Bạn chưa chọn gì!")
+                return
         body = {"quantities": self.selected_quantities, "menu_items": self.menu_items}
         self._show_spinner()
         threading.Thread(target=self._post_cart, args=(body,), daemon=True).start()
@@ -586,6 +620,7 @@ class MainScreenCus(Screen):
         if self._btns:
             self._switch(self._btns[0], "menu")
 
+
     def _switch(self, btn, scr):
         if self._active and self._active != btn:
             self._active.change_color(233 / 255, 150 / 255, 14 / 255, 1)
@@ -600,3 +635,5 @@ class MainScreenCus(Screen):
 
     def _sync_bg(self, *_):
         self._bg.size = self.size; self._bg.pos = self.pos
+
+    
