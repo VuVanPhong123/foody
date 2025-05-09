@@ -225,7 +225,7 @@ class WeatherRecommendationDialog(ModalView):
 
         # Create title label with bold font
         title_label = Label(
-            text=f"{index}. {title}",
+            text=f"{title}",
             size_hint_y=None,
             height=dp(30),
             font_size=dp(16),

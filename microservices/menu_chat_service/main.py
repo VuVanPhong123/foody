@@ -59,7 +59,7 @@ def get_or_create_chat_session(session_id: Optional[str] = None) -> tuple:
     if not session_id or session_id not in active_sessions:
         session_id = str(uuid.uuid4())
         # Create new chat session
-        chat = client.chats.create(model=MODEL, config=GenerateContentConfig(system_instruction=prompt))
+        chat = client.chats.create(model="gemini-2.0-flash", config=GenerateContentConfig(system_instruction=prompt))
         active_sessions[session_id] = chat
         is_new = True
         
