@@ -1,6 +1,10 @@
 from frontend.roundButton import RoundedButton
-import os, ast, requests, threading
+import os
+import ast
+import requests
+import threading
 import random
+from functools import partial
 from kivy.clock import Clock
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
@@ -15,7 +19,7 @@ from kivy.graphics import Color, Rectangle
 from kivymd.uix.button import MDIconButton, MDFloatingActionButton
 from kivymd.uix.spinner import MDSpinner
 from kivy.app import App
-from functools import partial
+
 from frontend.weatherRecommendationDialog import WeatherRecommendationDialog
 
 

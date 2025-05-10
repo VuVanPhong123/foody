@@ -1,11 +1,21 @@
+"""
+changePasswordScreenCus.py
+
+This module contains the ChangePasswordScreen class, which provides a user interface
+for changing a user's password. It includes fields for the old password, new password,
+and confirmation of the new password, along with functionality to handle password change
+requests to the server.
+"""
+
 import requests
-from frontend.roundButton import RoundedButton
 from kivy.uix.screenmanager import Screen
 from kivy.uix.label import Label
 from kivy.uix.floatlayout import FloatLayout
 from kivy.graphics import Color, Rectangle
 from kivymd.uix.textfield import MDTextField
 from kivymd.uix.button import MDFloatingActionButton, MDIconButton
+from frontend.roundButton import RoundedButton
+
 
 class ChangePasswordScreen(Screen):
     def __init__(self, **kwargs):
@@ -107,7 +117,7 @@ class ChangePasswordScreen(Screen):
         self.confirm_pass.password = not self.confirm_pass.password
         instance.icon = "eye" if not self.confirm_pass.password else "eye-off"
 
-    def change_password(self, instance):
+    def change_password(self, _):
         old = self.old_pass.text.strip()
         new = self.new_pass.text.strip()
         confirm = self.confirm_pass.text.strip()
@@ -124,15 +134,15 @@ class ChangePasswordScreen(Screen):
                 "username": self.username,
                 "old_password": old,
                 "new_password": new
-            })
+            }, timeout=5)
             if resp.status_code == 200:
                 self.status.color = (0, 0.5, 0, 1)
-                self.status.text = " Đổi mật khẩu thành công"
+                self.status.text = "Đổi mật khẩu thành công"
                 self.old_pass.text = self.new_pass.text = self.confirm_pass.text = ""
             else:
                 self.status.color = (1, 0, 0, 1)
                 self.status.text = resp.json().get("detail", "Đổi mật khẩu thất bại")
-        except Exception as e:
+        except requests.exceptions.RequestException as e:
             self.status.text = f"Lỗi kết nối: {e}"
 
     def go_back(self, instance):
