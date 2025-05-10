@@ -25,7 +25,7 @@ def get_stored_hash():
     with open(PASS_FILE, "r") as f:
         return f.read().strip()
 
-def save_new_hash(new_hash):
+def save_new_hash(new_hash : str):
     with open(PASS_FILE, "w") as f:
         f.write(new_hash)
 

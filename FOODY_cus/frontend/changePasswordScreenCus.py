@@ -2,7 +2,6 @@ import requests
 from frontend.roundButton import RoundedButton
 from kivy.uix.screenmanager import Screen
 from kivy.uix.label import Label
-from kivy.uix.image import Image
 from kivy.uix.floatlayout import FloatLayout
 from kivy.graphics import Color, Rectangle
 from kivymd.uix.textfield import MDTextField
@@ -20,7 +19,7 @@ class ChangePasswordScreen(Screen):
         self.layout = FloatLayout()
         self.add_widget(self.layout)
 
-        self.username = ""  
+        self.username = ""
         self.user_label = Label(
             text="",
             font_size=18,

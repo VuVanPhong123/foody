@@ -1,8 +1,8 @@
 from fastapi import FastAPI, HTTPException, Depends
 from pydantic import BaseModel
-import requests
 import json
 import os
+from microservices.food_service.foodmanager import FoodManager
 import uvicorn
 from chat_history_db import ChatHistoryDB
 from google import genai
@@ -16,8 +16,7 @@ app = FastAPI(title="Gemini Menu Chat Service")
 API_KEY = "AIzaSyCI9Fzm4AEv3zPtzr5SVp1xmyOcfr1t830"
 MODEL = "models/gemini-1.5-pro"  # Updated to use correct model format
 EMBEDDING_MODEL = "models/embedding-001"
-MENU_FILE = "microservices/menu_chat_service/data/menu_vi.txt" 
-
+MENU_FILE = 'microservices/menu_chat_service/data/menu_vi.txt'
 # Initialize chat history database
 chat_db = ChatHistoryDB()
 import pathlib
