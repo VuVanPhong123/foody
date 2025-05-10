@@ -16,7 +16,6 @@ from kivymd.uix.textfield import MDTextField
 from kivymd.uix.button import MDFloatingActionButton, MDIconButton
 from frontend.roundButton import RoundedButton
 
-
 class ChangePasswordScreen(Screen):
     def __init__(self, **kwargs):
         super(ChangePasswordScreen, self).__init__(**kwargs)
@@ -145,9 +144,9 @@ class ChangePasswordScreen(Screen):
         except requests.exceptions.RequestException as e:
             self.status.text = f"Lỗi kết nối: {e}"
 
-    def go_back(self, instance):
+    def go_back(self, _):
         self.manager.current = "settings"
 
-    def update_rect(self, *args):
+    def update_rect(self, *_):
         self.rect.size = self.size
         self.rect.pos = self.pos
