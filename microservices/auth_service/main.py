@@ -17,17 +17,21 @@ class PasswordLogin(BaseModel):
     password: str
 
 def get_stored_hash():
-    if not os.path.exists(PASS_FILE):
+    try:
+        with open(PASS_FILE, "r") as f:
+            return f.read().strip()
+    except FileNotFoundError:
         default_hash = pwd_context.hash("1")
         with open(PASS_FILE, "w") as f:
             f.write(default_hash)
         return default_hash
-    with open(PASS_FILE, "r") as f:
-        return f.read().strip()
 
 def save_new_hash(new_hash : str):
-    with open(PASS_FILE, "w") as f:
-        f.write(new_hash)
+    try:
+        with open(PASS_FILE, "w") as f:
+            f.write(new_hash)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to save new hash: {e}")
 
 @app.post("/owner/login")
 def login(data: PasswordLogin):
