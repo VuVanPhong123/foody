@@ -1,6 +1,5 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-import os
 from passlib.context import CryptContext
 import uvicorn
 
