@@ -1,13 +1,8 @@
-from kivy.app import App
 from kivy.uix.label import Label
 from kivy.uix.image import Image
-from kivy.uix.button import Button
-from kivy.uix.widget import Widget 
-from kivy.uix.floatlayout import FloatLayout
-from kivy.uix.screenmanager import Screen,ScreenManager
+from kivy.uix.screenmanager import Screen
 from kivy.graphics import Color, Rectangle
-
-from kivymd.uix.button import MDFlatButton, MDFloatingActionButton
+from kivymd.uix.button import  MDFloatingActionButton
 from kivymd.app import MDApp
 
 class WelcomeScreen(Screen):
@@ -44,7 +39,7 @@ class WelcomeScreen(Screen):
     def update_rect(self, *args):
         self.rect.size = self.size
         self.rect.pos = self.pos
-    def go_to_role_screen(self, instance):
+    def go_to_role_screen(self, _):
             self.manager.current = 'log' 
 class app(MDApp):
     def build(self):
