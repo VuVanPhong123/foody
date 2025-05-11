@@ -1,5 +1,6 @@
 # frontend/logScreencus.py
-import threading, requests
+import threading
+import requests
 from kivy.uix.screenmanager import Screen
 from kivy.uix.label import Label
 from kivy.uix.image import Image
