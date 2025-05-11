@@ -1,7 +1,7 @@
+import os
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import pandas as pd
-import os
 import uvicorn
 
 app = FastAPI(title="Order Service")
@@ -32,7 +32,7 @@ def calculate_order(data: OrderRequest):
                 total += price * qty
         return {"total_price": total}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @app.get("/menu")
@@ -41,7 +41,7 @@ def get_menu():
         menu = load_menu()
         return menu
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8001)

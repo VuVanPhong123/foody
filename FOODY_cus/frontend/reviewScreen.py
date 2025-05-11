@@ -1,14 +1,15 @@
-import threading, requests
+import threading
+import requests
 from kivy.uix.screenmanager import Screen
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.textinput import TextInput
 from kivy.uix.button import Button
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
+from kivy.clock import Clock
 from kivy.graphics import Color, Rectangle
 from kivymd.uix.button import MDFloatingActionButton
 from kivymd.uix.spinner import MDSpinner
-from kivy.clock import Clock
 
 class ReviewScreen(Screen):
     ENDPOINT = "http://localhost:8008/review"

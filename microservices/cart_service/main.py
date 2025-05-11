@@ -1,8 +1,8 @@
+import os
+import json
 from fastapi import FastAPI, Request, HTTPException
 from pydantic import BaseModel
 import pandas as pd
-import os
-import json
 import uvicorn
 
 app = FastAPI(title="Cart Service")
@@ -77,7 +77,7 @@ def get_cart():
         df = read_cart_from_excel()
         return df.to_dict(orient="records")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 @app.delete("/cart")
 async def delete_cart(request: Request):
@@ -115,7 +115,7 @@ async def delete_cart(request: Request):
         else:
             raise HTTPException(status_code=404, detail="Matching cart entry not found")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8004)

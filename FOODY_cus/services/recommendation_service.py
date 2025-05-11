@@ -1,7 +1,9 @@
-from google import genai
+from typing import Optional
 import os
-from services.weather_service import WeatherService
 import getpass
+from google import genai
+from services.weather_service import WeatherService
+
 
 os.environ["GOOGLE_API_KEY"] = "AIzaSyCI9Fzm4AEv3zPtzr5SVp1xmyOcfr1t830"
 
@@ -18,7 +20,7 @@ class RecommendationService:
             model="gemini-2.0-flash",
         )
         
-    def get_weather_recommendations(self, menu_items, location=None):
+    def get_weather_recommendations(self, menu_items, location : Optional[str] = None):
         """Get food recommendations based on current weather"""
         # Get current weather
         weather_data = self.weather_service.get_current_weather()
@@ -62,7 +64,7 @@ Cuối cùng, hãy đưa ra phần tóm tắt ngắn gọn về thời tiết hi
                 'recommendations': response.text,
                 'success': True
             }
-        except Exception as e:
+        except ValueError as e:
             print(f"Error generating recommendations: {e}")
             return {
                 'weather_data': weather_data,

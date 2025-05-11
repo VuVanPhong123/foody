@@ -1,8 +1,8 @@
+from typing import Optional
+import os
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from typing import Optional
 import pandas as pd
-import os
 import uvicorn
 
 app = FastAPI(title="Order Info Service")
@@ -69,7 +69,7 @@ def create_order(info: OrderInfo):
         save_order(info)
         return {"message": "Order saved"}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 @app.put("/orderinfo/{index}")
 def modify_order(index: int, info: OrderInfo):
@@ -77,7 +77,7 @@ def modify_order(index: int, info: OrderInfo):
         update_order(index, info)
         return {"message": f"Order {index} updated"}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 @app.delete("/orderinfo/{index}")
 def remove_order(index: int):
@@ -103,7 +103,7 @@ def remove_order(index: int):
 
         return {"message": f"Order {index} declined and saved to history"}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 if __name__ == "__main__":

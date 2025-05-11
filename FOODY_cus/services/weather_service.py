@@ -1,6 +1,5 @@
-import requests
-import json
 from datetime import datetime
+import requests
 
 class WeatherService:
     def __init__(self, api_key=None):
@@ -18,7 +17,7 @@ class WeatherService:
         }
         
         try:
-            response = requests.get(self.base_url, params=params)
+            response = requests.get(self.base_url, params=params, timeout=10)
             response.raise_for_status()
             
             data = response.json()
