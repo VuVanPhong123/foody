@@ -1,8 +1,6 @@
-from kivy.app import App
+
 from kivy.uix.button import Button
-from kivy.uix.floatlayout import FloatLayout
 from kivy.graphics import Color, RoundedRectangle
-from kivy.animation import Animation
 
 class RoundedButton(Button):
     def __init__(self, color=(0.2, 0.6, 1, 1), **kwargs):
