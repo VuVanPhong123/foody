@@ -52,6 +52,9 @@ def register(data: RegisterRequest):
 
 @app.post("/login")
 def login(data: LoginRequest):
+    if not data.username.strip() or not data.password.strip():
+        raise HTTPException(status_code=400, detail="Username and password cannot be empty")
+
     df = read_accounts()
     row = df[df["username"].str.lower() == data.username.lower()]
 
@@ -63,6 +66,7 @@ def login(data: LoginRequest):
         raise HTTPException(status_code=401, detail="Invalid username or password")
 
     return {"message": "Login successful", "username": row.iloc[0]["username"]}
+
 @app.put("/change_pass")
 def change_password(data: ChangePassRequest):
     df = read_accounts()
