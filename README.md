@@ -64,4 +64,10 @@ Hệ thống/
 ![image](https://github.com/user-attachments/assets/4ec6d740-d619-45f5-b485-f5e4d765fa62)
 ![image](https://github.com/user-attachments/assets/838dce49-e380-41ae-83ec-f928035a2157)
 ![image](https://github.com/user-attachments/assets/eefdf5f2-a78f-4a36-983e-75ef442cf759)
+![image](https://github.com/user-attachments/assets/83c76c32-96f0-4942-82d8-923cdd1f639a)
+![image](https://github.com/user-attachments/assets/250e70b4-b349-4294-b756-0486743a0db2)
+![image](https://github.com/user-attachments/assets/7cacc789-26b9-4e37-b06d-b0ffa88eced2)
+
+
+
 
