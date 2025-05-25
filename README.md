@@ -2,7 +2,7 @@ foody app
 ![image](https://github.com/user-attachments/assets/dd2b1e73-e060-4395-b779-40069e619a0b)
 
 
-# Hệ thống Đặt Món Ăn và Đánh Giá Nhà Hàng
+# Hệ thống Đặt Món Ăn và Đánh Giá Nhà Hàng + Quản lý vật phẩm theo dõi đơn hàng cho chủ cửa hàng
 
 ## Giới thiệu
 
@@ -58,11 +58,10 @@ Hệ thống/
 │   ├── main.py          # Ứng dụng Kivy chính  
 │   └── ...             # Các module hỗ trợ giao diện (widgets, screens, services)  
 └── README.md            # Tài liệu hướng dẫn (file này)  
-```
 
 ## Hình ảnh minh họa từ APP
-
-
-
-
+![image](https://github.com/user-attachments/assets/733c661a-e447-421b-951b-1e42c1616020)
+![image](https://github.com/user-attachments/assets/4ec6d740-d619-45f5-b485-f5e4d765fa62)
+![image](https://github.com/user-attachments/assets/838dce49-e380-41ae-83ec-f928035a2157)
+![image](https://github.com/user-attachments/assets/eefdf5f2-a78f-4a36-983e-75ef442cf759)
 
