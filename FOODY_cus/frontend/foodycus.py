@@ -9,6 +9,7 @@ from frontend.reviewScreen import ReviewScreen
 from frontend.chatScreenCus import ChatScreenCus
 from frontend.changePasswordScreenCus import ChangePasswordScreen
 from frontend.signupScreencus import SignUpScreen
+from frontend.geminiChatScreen import GeminiChatScreen
 from kivy.uix.screenmanager import ScreenManager, FallOutTransition
 from kivymd.app import MDApp
 
@@ -20,6 +21,7 @@ class Foody(MDApp):
         #sm.add_widget(LogDelayTest(name='log'))
         #sm.add_widget(LogEndpointChangeTest(name='log'))
         #sm.add_widget(LogGarbageCharTest(name='log'))
+        sm.add_widget(GeminiChatScreen(name='gemini'))
         sm.add_widget(SignUpScreen(name='signup'))
         sm.add_widget(MainScreenCus(name='mainscreen'))
         sm.add_widget(SettingsScreen(name='settings')) 
